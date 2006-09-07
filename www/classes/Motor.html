@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: Motor</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">Motor</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../files/motor_rb.html">
+                motor.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                <a href="Brick.html">
+                Brick
+               </a>
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+Controls an <a href="NXT.html">NXT</a> motor.
+</p>
+<p>
+Example:
+</p>
+<pre>
+  m = Motor.new('a')
+  m.forward(:degrees =&gt; 180, :power =&gt; 50)
+</pre>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000006">backward</a>&nbsp;&nbsp;
+      <a href="#M000008">disconnect</a>&nbsp;&nbsp;
+      <a href="#M000005">forward</a>&nbsp;&nbsp;
+      <a href="#M000004">name</a>&nbsp;&nbsp;
+      <a href="#M000003">new</a>&nbsp;&nbsp;
+      <a href="#M000011">reset_tacho</a>&nbsp;&nbsp;
+      <a href="#M000009">run</a>&nbsp;&nbsp;
+      <a href="#M000007">state</a>&nbsp;&nbsp;
+      <a href="#M000010">stop</a>&nbsp;&nbsp;
+      <a href="#M000012">update_state</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+    <div id="constants-list">
+      <h3 class="section-bar">Constants</h3>
+
+      <div class="name-list">
+        <table summary="Constants">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">POLL_INTERVAL</td>
+          <td>=</td>
+          <td class="context-item-value">0.5</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+    <div id="attribute-list">
+      <h3 class="section-bar">Attributes</h3>
+
+      <div class="name-list">
+        <table>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">log</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">port</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">ratio</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        </table>
+      </div>
+    </div>
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000003.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000003.html');return false;">
+          <span class="method-name">new</span><span class="method-args">(port, dev = $DEV)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000006" class="method-detail">
+        <a name="M000006"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000006.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000006.html');return false;">
+          <span class="method-name">backward</span><span class="method-args">(options)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Rotate the motor backwards. See <a
+href="Motor.html#M000005">Motor#forward</a> and <a
+href="Motor.html#M000009">Motor#run</a>.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000008" class="method-detail">
+        <a name="M000008"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000008.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000008.html');return false;">
+          <span class="method-name">disconnect</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Closes the connection to the <a href="NXT.html">NXT</a> and to other
+resources.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000005" class="method-detail">
+        <a name="M000005"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000005.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000005.html');return false;">
+          <span class="method-name">forward</span><span class="method-args">(options)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Rotate the motor forwards. See <a href="Motor.html#M000009">Motor#run</a>.
+Examples:
+</p>
+<pre>
+  m.forward(:degrees =&gt; 360, :power =&gt; 20)
+</pre>
+<p>
+The above rotates the motor 360 degrees forward at 20% power.
+</p>
+<pre>
+  m.forward(:time =&gt; 5)
+</pre>
+<p>
+The above rotates the motor forwards for 5 seconds at 25% power (because
+25% is the default).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000004" class="method-detail">
+        <a name="M000004"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000004.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000004.html');return false;">
+          <span class="method-name">name</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000011" class="method-detail">
+        <a name="M000011"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000011.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000011.html');return false;">
+          <span class="method-name">reset_tacho</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Resets the motor&#8217;s tachometer movement count (i.e. +:degree_count+ in
+<a href="Motor.html#M000007">Motor#state</a>).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000009" class="method-detail">
+        <a name="M000009"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000009.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000009.html');return false;">
+          <span class="method-name">run</span><span class="method-args">(options)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Low-level command for initiating motor rotation. Options is a hash with the
+following keys:
+</p>
+<dl>
+<dt>+:power+</dt><dd>Power from 0 to 100. Default is 25.
+
+</dd>
+<dt>+:time+</dt><dd>Maximum time to run the motor in seconds.
+
+<pre>
+                           By default there is no time limit.
+                           If :degrees is also specified then the motor
+                           will only turn as far as :degrees and will stop and
+                           wait out the remaining :time has expired.
+</pre>
+</dd>
+<dt>+:regulate+</dt><dd>False to disable power regulation. It is true (i.e. on)
+
+<pre>
+                       by default.
+</pre>
+</dd>
+<dt>+:degrees+</dt><dd>The maximum tachometer degrees to turn before automatically
+
+<pre>
+                        stopping. Use negative values for backward movement (need to
+                        double check that this is in fact true)
+</pre>
+</dd>
+<dt>+:direction+</dt><dd>Direction in which the motor should move. 1 for forward,
+
+<pre>
+                      -1 for backward. The default is 1 (i.e. forward).
+</pre>
+</dd>
+</dl>
+<p>
+Examples:
+</p>
+<pre>
+     m.run(:degrees =&gt; 90, :direction =&gt; -1)
+</pre>
+<p>
+The above will rotate backward up to 90 degrees.
+</p>
+<pre>
+  m.run(:time =&gt; 8, :power =&gt; 100)
+</pre>
+<p>
+The above will rotate forward for 8 seconds at 100% power.
+</p>
+<pre>
+     m.run(:power =&gt; 50, :degrees =&gt; 180, :time =&gt; 3)
+</pre>
+<p>
+The above will rotate forward for 3 seconds up to 180 degrees at 50% power.
+If the 180 degree rotation takes only 1 second to complete, the motor will
+sit there and wait out the full 3 seconds anyway.
+</p>
+<pre>
+  m.run
+</pre>
+<p>
+The above will rotate forward indefinitely (until +m.stop+ is called).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000007" class="method-detail">
+        <a name="M000007"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000007.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000007.html');return false;">
+          <span class="method-name">state</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Return the current state of the motor as a hash. The data available is as
+follows:
+</p>
+<dl>
+<dt>+:port+</dt><dd><a href="Motor.html">Motor</a>&#8217;s port. This will always be equal to
++self.port+.
+
+</dd>
+<dt>+:power+</dt><dd>Current power setting. 0 to 100.
+
+</dd>
+<dt>+:mode+</dt><dd>Current output mode. See <a href="NXTComm.html">NXTComm</a> constants.
+
+</dd>
+<dt>+:regulation+</dt><dd>Current power regulation mode. See <a href="NXTComm.html">NXTComm</a>
+constants.
+
+</dd>
+<dt>+:ratio+</dt><dd>Gear scaling ratio. This should always be equal to +self.ratio+.
+
+</dd>
+<dt>+:run_state+</dt><dd>Current output run state. See <a href="NXTComm.html">NXTComm</a> constants.
+
+</dd>
+<dt>+:degree_limit+</dt><dd>The rotation limit previously set. 0 means no limit.
+
+</dd>
+<dt>+:tacho_count+</dt><dd>Internal tachometer count.
+
+</dd>
+<dt>+:tacho_count_block+</dt><dd>Total relative rotation count (for the motor or the nxt??)
+
+</dd>
+<dt>+:degree_count+</dt><dd>The total relative degrees turned since the last <a
+href="Motor.html#M000011">Motor#reset_tacho</a> call.
+
+<pre>
+                                                   Turning backwards adds negative values, so this can go negative.
+</pre>
+</dd>
+</dl>
+        </div>
+      </div>
+
+      <div id="method-M000010" class="method-detail">
+        <a name="M000010"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000010.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000010.html');return false;">
+          <span class="method-name">stop</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Stop movement.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000012" class="method-detail">
+        <a name="M000012"></a>
+
+        <div class="method-heading">
+          <a href="Motor.src/M000012.html" target="Code" class="method-signature"
+            onclick="popupCode('Motor.src/M000012.html');return false;">
+          <span class="method-name">update_state</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Updates the motor state info by requesting new data from the nxt. This is
+mostly used internally; you should use <a
+href="Motor.html#M000007">Motor#state</a> instead.
+</p>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

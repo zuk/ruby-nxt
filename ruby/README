@@ -1,0 +1,16 @@
+= ruby-nxt
+
+==== The ruby-nxt library lets you control the LEGO Mindstorms NXT robotics kit via Bluetooth using the Ruby language.
+
+<em>This library is currently in the early stages of development and is far from complete.</em>
+
+There are two interfaces:
+
+- The NXT class provides a high-level, multi-threaded, object-oriented interface.
+  Currently only motor functionality is implemented (sensors aren't).
+  
+- The NXTComm class provides low-level direct access to the NXT Bluetooth
+  protocol.
+  
+ruby-nxt requires ruby-serialport which you must download and install from:
+http://raa.ruby-lang.org/project/ruby-serialport

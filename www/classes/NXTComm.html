@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: NXTComm</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">NXTComm</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../files/nxt_comm_rb.html">
+                nxt_comm.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                Object
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+Low-level interface for communicating directly with the <a
+href="NXT.html">NXT</a> via a Bluetooth serial port.
+</p>
+<p>
+Not all functionality is implemented yet!
+</p>
+<p>
+Examples:
+</p>
+<pre>
+      NXTComm.exec(&quot;/dev/tty.NXT-DevB-1&quot;) do |cmd|
+        cmd.SetOutputState(
+      NXTComm::MOTOR_B,
+      100,
+      NXTComm::MOTORON | NXTComm::BRAKE | NXTComm::REGULATED,
+      NXTComm::REGULATION_MODE_MOTOR_SPEED,
+      100,
+      NXTComm::MOTOR_RUN_STATE_RUNNING,
+      0
+    )
+  end
+</pre>
+<p>
+The above would rotate the motor connected to port B forwards indefinitely
+at 100% power.
+</p>
+<pre>
+  cmd.PlayTone(1000,500)
+</pre>
+<p>
+The above would play a tone at 1000 Hz (??) for 500 ticks (half a second??)
+</p>
+<pre>
+  puts &quot;Battery Level: #{cmd.GetBatteryLevel[0]/1000.0} V&quot;
+</pre>
+<p>
+The above would print out the current battery level (obviously).
+</p>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000013">connect</a>&nbsp;&nbsp;
+      <a href="#M000016">exec</a>&nbsp;&nbsp;
+      <a href="#M000017">method_missing</a>&nbsp;&nbsp;
+      <a href="#M000020">new</a>&nbsp;&nbsp;
+      <a href="#M000019">recv_reply</a>&nbsp;&nbsp;
+      <a href="#M000018">send_cmd</a>&nbsp;&nbsp;
+      <a href="#M000014">start</a>&nbsp;&nbsp;
+      <a href="#M000015">stop</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+    <div id="constants-list">
+      <h3 class="section-bar">Constants</h3>
+
+      <div class="name-list">
+        <table summary="Constants">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SENSOR_1</td>
+          <td>=</td>
+          <td class="context-item-value">0x00</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+sensors
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SENSOR_2</td>
+          <td>=</td>
+          <td class="context-item-value">0x01</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SENSOR_3</td>
+          <td>=</td>
+          <td class="context-item-value">0x02</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SENSOR_4</td>
+          <td>=</td>
+          <td class="context-item-value">0x03</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_A</td>
+          <td>=</td>
+          <td class="context-item-value">0x00</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+motors
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_B</td>
+          <td>=</td>
+          <td class="context-item-value">0x01</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_C</td>
+          <td>=</td>
+          <td class="context-item-value">0x02</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_ALL</td>
+          <td>=</td>
+          <td class="context-item-value">0xFF</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">IDLE</td>
+          <td>=</td>
+          <td class="context-item-value">0x01</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+output mode
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTORON</td>
+          <td>=</td>
+          <td class="context-item-value">0x01</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">BRAKE</td>
+          <td>=</td>
+          <td class="context-item-value">0x02</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">REGULATED</td>
+          <td>=</td>
+          <td class="context-item-value">0x04</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">REGULATION_MODE_IDLE</td>
+          <td>=</td>
+          <td class="context-item-value">0x00</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+output regulation mode
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">REGULATION_MODE_MOTOR_SPEED</td>
+          <td>=</td>
+          <td class="context-item-value">0x01</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">REGULATION_MODE_MOTOR_SYNC</td>
+          <td>=</td>
+          <td class="context-item-value">0x02</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_RUN_STATE_IDLE</td>
+          <td>=</td>
+          <td class="context-item-value">0x00</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+output run state
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_RUN_STATE_RAMPUP</td>
+          <td>=</td>
+          <td class="context-item-value">0x10</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_RUN_STATE_RUNNING</td>
+          <td>=</td>
+          <td class="context-item-value">0x20</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MOTOR_RUN_STATE_RAMPDOWN</td>
+          <td>=</td>
+          <td class="context-item-value">0x40</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NO_SENSOR</td>
+          <td>=</td>
+          <td class="context-item-value">0x00</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+sensor type
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SWITCH</td>
+          <td>=</td>
+          <td class="context-item-value">0x01</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">TEMPERATURE</td>
+          <td>=</td>
+          <td class="context-item-value">0x02</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">REFLECTION</td>
+          <td>=</td>
+          <td class="context-item-value">0x03</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">ANGLE</td>
+          <td>=</td>
+          <td class="context-item-value">0x04</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LIGHT_ACTIVE</td>
+          <td>=</td>
+          <td class="context-item-value">0x05</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LIGHT_INACTIVE</td>
+          <td>=</td>
+          <td class="context-item-value">0x06</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SOUND_DB</td>
+          <td>=</td>
+          <td class="context-item-value">0x07</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SOUND_DBA</td>
+          <td>=</td>
+          <td class="context-item-value">0x08</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">CUSTOM</td>
+          <td>=</td>
+          <td class="context-item-value">0x09</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LOWSPEED</td>
+          <td>=</td>
+          <td class="context-item-value">0x0A</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LOWSPEED_9V</td>
+          <td>=</td>
+          <td class="context-item-value">0x0B</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NO_OF_SENSOR_TYPES</td>
+          <td>=</td>
+          <td class="context-item-value">0x0C</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">RAWMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0x00</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+sensor mode
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">BOOLEANMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0x20</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">TRANSITIONCNTMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0x40</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">PERIODCOUNTERMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0x60</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">PCTFULLSCALEMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0x80</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">CELSIUSMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0xA0</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">FAHRENHEITMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0xC0</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">ANGLESTEPSMODE</td>
+          <td>=</td>
+          <td class="context-item-value">0xE0</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SLOPEMASK</td>
+          <td>=</td>
+          <td class="context-item-value">0x1F</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MODEMASK</td>
+          <td>=</td>
+          <td class="context-item-value">0xE0</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000013" class="method-detail">
+        <a name="M000013"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000013.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000013.html');return false;">
+          <span class="method-name">connect</span><span class="method-args">(dev)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000016" class="method-detail">
+        <a name="M000016"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000016.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000016.html');return false;">
+          <span class="method-name">exec</span><span class="method-args">(dev) {|cmd| ...}</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000020" class="method-detail">
+        <a name="M000020"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000020.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000020.html');return false;">
+          <span class="method-name">new</span><span class="method-args">(dev)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+keep the constructor hidden since we use <a
+href="NXTComm.html#M000013">connect</a> as a factory method
+</p>
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000017" class="method-detail">
+        <a name="M000017"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000017.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000017.html');return false;">
+          <span class="method-name">method_missing</span><span class="method-args">(name,*arg)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000019" class="method-detail">
+        <a name="M000019"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000019.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000019.html');return false;">
+          <span class="method-name">recv_reply</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000018" class="method-detail">
+        <a name="M000018"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000018.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000018.html');return false;">
+          <span class="method-name">send_cmd</span><span class="method-args">(msg)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000014" class="method-detail">
+        <a name="M000014"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000014.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000014.html');return false;">
+          <span class="method-name">start</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000015" class="method-detail">
+        <a name="M000015"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000015.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000015.html');return false;">
+          <span class="method-name">stop</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
