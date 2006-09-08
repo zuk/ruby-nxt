@@ -14,8 +14,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require 'nxt_comm'
-require 'motor'
+require File.dirname(__FILE__)+'/nxt_comm'
+require File.dirname(__FILE__)+'/motor'
 
 # High-level interface for controlling motors and sensors connected to the NXT.
 # Currently only motors and some other misc functionality is implemented.
@@ -35,7 +35,7 @@ require 'motor'
 #   nxt.motors_abc do |m|
 #   	m.reset_tacho
 #   	m.forward(:time => 3, :power => 10)
-#   	puts "Motor #{m.name} moved #{m.state[:degree_count]} degrees."
+#   	puts "Motor #{m.name} moved #{m.read_state[:degree_count]} degrees."
 #   end
 #   
 #   nxt.disconnect

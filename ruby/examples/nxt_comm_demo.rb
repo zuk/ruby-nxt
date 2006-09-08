@@ -1,6 +1,7 @@
 #!/usr/local/bin/ruby
 
 require 'nxt_comm'
+require 'yaml'
 
 $DEBUG = false
 
@@ -16,7 +17,7 @@ NXTComm.exec("/dev/tty.NXT-DevB-1") do |cmd|
   # cmd.PlaySoundFile(false,"Good Job.rso")
 
   # PlayTone(frequency,duration)
-   cmd.PlayTone(50,500)
+  # cmd.PlayTone(50,500)
   
   # SetOutputState(port,power,mode,regulation,turn ratio,run state,tacho limit)
 #   cmd.SetOutputState(
@@ -40,10 +41,17 @@ NXTComm.exec("/dev/tty.NXT-DevB-1") do |cmd|
 #   )
 
   # SetInputMode(port,type,mode)
-  # cmd.SetInputMode(NXTComm::SENSOR_1,NXTComm::SWITCH,NXTComm::RAWMODE)
+  cmd.SetInputMode(NXTComm::SENSOR_3,NXTComm::LIGHT_INACTIVE,NXTComm::RAWMODE)
+  
+  while true
+	  s = cmd.GetInputValues(NXTComm::SENSOR_3)
+	  
+	  puts s.inspect
+	  sleep(1)
+  end
   
    #GetOutputState(motor_port)
-  puts "GetOutputState: #{cmd.GetOutputState(NXTComm::MOTOR_B)}"
+  #puts "GetOutputState: #{cmd.GetOutputState(NXTComm::MOTOR_B)}"
   
   # GetInputValues(sensor_port)
   # cmd.GetInputValues(NXTComm::SENSOR_1)
@@ -58,7 +66,7 @@ NXTComm.exec("/dev/tty.NXT-DevB-1") do |cmd|
   # cmd.ResetMotorPosition(NXTComm::MOTOR_B,false)
   
   # GetBatteryLevel
-  puts "Battery Level: #{cmd.GetBatteryLevel[0]/1000.0} V"
+  #puts "Battery Level: #{cmd.GetBatteryLevel[0]/1000.0} V"
   
   # StopSoundPlayback - stops any currently playing sounds
   #cmd.PlaySoundFile(true,"Woops.rso")

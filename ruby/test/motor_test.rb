@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'motor'
+require File.dirname(__FILE__)+'/../motor'
 
 $DEV = '/dev/tty.NXT-DevB-1'
 
@@ -13,7 +13,7 @@ class MotorTest < Test::Unit::TestCase
 		
 		# make sure that we can talk to each of the motors before we try to run any tests
 #		@motors.each do |m|
-#			state = m.state
+#			state = m.read_state
 #			if not state
 #				raise "Cannot run tests because motor #{m.port} is not responding."
 #			end
@@ -30,30 +30,30 @@ class MotorTest < Test::Unit::TestCase
 		assert_equal 'c', @motors[2].name
 	end
 	
-	def test_state
+	def test_read_state
 		# check just one motor
-		state = @motors.first.state
+		state = @motors.first.read_state
 		assert_not_nil state
 		assert_equal @motors.first.port, state[:port]
 	
 		# now do all motors (in parallel, since each should launch its own thread)
 		@motors.each do |m|
-			state = m.state
+			state = m.read_state
 			assert_not_nil state
 			assert_equal m.port, state[:port]
 		end
 		
 		# run it again to make sure we can do it consecutively
 		@motors.each do |m|
-			state = m.state
+			state = m.read_state
 			assert_not_nil state
 			assert_equal m.port, state[:port]
 		end
 		
 		# sanity check... two consecutive state checks should be the same, since nothing's changed
 		@motors.each do |m|
-			state1 = m.state
-			state2 = m.state
+			state1 = m.read_state
+			state2 = m.read_state
 			assert_equal state1, state2
 		end
 	end
@@ -61,7 +61,7 @@ class MotorTest < Test::Unit::TestCase
 	def test_reset_tacho
 		@motors.each do |m|
 			m.reset_tacho
-			state = m.state
+			state = m.read_state
 			assert_equal 0, state[:degree_count]
 		end
 	end
@@ -72,12 +72,12 @@ class MotorTest < Test::Unit::TestCase
   	@motors.each do |m|
 	  	m.reset_tacho
 	  	m.forward(:degrees => 360, :power => 10)
-	  	state = m.state
+	  	state = m.read_state
 	  	assert_in_delta(360, state[:degree_count], 30)
 	  	
 	  	m.reset_tacho
 	  	m.backward(:degrees => 360, :power => 10)
-	  	state = m.state
+	  	state = m.read_state
 	  	assert_in_delta(-360, state[:degree_count], 30)
   	end
   end
@@ -86,12 +86,12 @@ class MotorTest < Test::Unit::TestCase
   	@motors.each do |m|
 	  	m.reset_tacho
 	  	m.forward(:time => 3, :power => 15)
-	  	state = m.state
+	  	state = m.read_state
 	  	assert_in_delta(344, state[:degree_count], 50)
 	  	
 	  	m.reset_tacho
 	  	m.backward(:time => 3, :power => 15)
-	  	state = m.state
+	  	state = m.read_state
 	  	assert_in_delta(-344, state[:degree_count], 50)
 	  end
   end

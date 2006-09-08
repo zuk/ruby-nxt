@@ -14,13 +14,23 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require 'nxt_comm'
+require 'yaml'
+require 'logger'
+
+require File.dirname(__FILE__)+'/nxt_comm'
+
+Logger::Formatter::Format = "%s, [%s#%d] %5s -- %s:\n%s\n"
 
 # Abstract parent class of motor and sensor bricks.
 # Currently provides only very basic common functionality but may
 # be expanded in the future.
 class Brick
 
+	attr_reader :port
+	attr_reader :log
+
+	# Initializes the logger for this brick and establiesh the Bluetooth
+	# connection to the NXT.
 	def initialize(port, dev = $DEV)
 		logfile = File.expand_path(File.dirname(__FILE__))+"/#{self.class}_#{port}.log"
 		@log = Logger.new logfile
@@ -31,6 +41,12 @@ class Brick
 		
 		@nxt = NXTComm.connect(dev)
 		@nxt.start
+	end
+	
+	# Closes the connection to the NXT and to other resources.
+	def disconnect
+		@nxt.stop
+		@log.close
 	end
 
 	private

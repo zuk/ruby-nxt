@@ -145,7 +145,7 @@ class NXTComm
     'SetOutputState'        => [0x04, proc{|op,p,m,rm,tr,rs,tl|[op,p,m,rm,tr,rs] + [tl].pack("V").unpack("C4")}, proc{[]} ],
     'SetInputMode'          => [0x05, proc{|sp,st,sm|[sp,st,sm]}, proc{[]}],
     'GetOutputState'        => [0x06, proc{|p|[p]}, proc{|r|a=r.from_hex_str.unpack('C6VVVV');(7..9).each{|i| a[i]= a[i].as_signed if a[i].kind_of? Bignum };a}],
-    'GetInputValues'        => [0x07, proc{|p|[p]}, proc{[]}],
+    'GetInputValues'        => [0x07, proc{|p|[p]}, proc{|r|r.from_hex_str.unpack('C6S2s2')}],
     'ResetInputScaledValue' => [0x08, proc{|p|[p]}, proc{[]}],
     'MessageWrite'          => [0x09, proc{|b,m|a=[];a << b-1;a << m.size+1;m.each_byte{|b| a << b};a}, proc{[]}],
     'ResetMotorPosition'    => [0x0A, proc{|p,r|a=[];a << p;r ? a << 0x01 : a << 0x00;a}, proc{[]}],
