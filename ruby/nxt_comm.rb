@@ -72,7 +72,7 @@ end
 #   @nxt.set_output_state(
 #     NXTComm::MOTOR_B,
 #     100,
-#     NXTComm::MOTORON | NXTComm::BRAKE | NXTComm::REGULATED,
+#     NXTComm::MOTORON,
 #     NXTComm::REGULATION_MODE_MOTOR_SPEED,
 #     100,
 #     NXTComm::MOTOR_RUN_STATE_RUNNING,
