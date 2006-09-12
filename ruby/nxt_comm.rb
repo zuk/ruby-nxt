@@ -186,7 +186,29 @@ class NXTComm
     0xFB => "Insufficient memory available",
     0xFF => "Bad arguments"
   }
+  
+  @@devs = {}
+  attr_reader :sp
+  
+  # This is the preferred method of obtaining an instance of NXTComm.
+  # You _must_ use this method if you plan to do any parallel communication
+  # with the NXT, otherwise you will end up making multiple connections
+  # to the same serial port... and bad things will happen :)
+  def self.connect(dev)	    
+    # we need to keep track of connections to make sure we don't have multiple instances of
+    # NXTComm talking to the same serial port
+   
+    if @@devs.include? dev and @@devs[dev].connected?
+    	@@devs[dev]
+    else
+    	@@devs[dev] = NXTComm.new(dev)
+    end
+  end
 
+	# Create a new instance of NXTComm, along with its own connection to
+	# the Bluetooth serialport.
+	# See NXTComm#connect, which manages serialport connections so you don't
+	# have to.
   def initialize(dev)
     @dev = dev
     @sp = nil
@@ -211,12 +233,20 @@ class NXTComm
 
   # Close the connection
   def close
-    @sp.close if @sp and not @sp.closed?
+  	@mutex.synchronize do
+    	@sp.close if @sp and not @sp.closed?
+  	end
+  end
+  
+  # Returns true if the connection to the NXT is open; false otherwise
+  def connected?
+  	not @sp.closed?
   end
 
   # Send message and return response
   def send_and_receive(op,cmd)
     msg = [op] + cmd + [0x00]
+    
     send_cmd(msg)
     len,ret = recv_reply
     
@@ -363,6 +393,43 @@ class NXTComm
       :rotation_count     => resp_parts[9]
     }
   end
+  # Get the state of the output motor port.
+  # * <tt>port</tt> - output port (MOTOR_A, MOTOR_B, MOTOR_C)
+  # Returns a hash with the following info (enumerated values see: set_output_state):
+  #   {
+  #     :port               => see: output ports,
+  #     :power              => -100 - 100,
+  #     :mode               => see: output modes,
+  #     :reg_mode           => see: regulation modes,
+  #     :turn_ratio         => -100 - 100,
+  #     :run_state          => see: run states,
+  #     :tacho_limit        => current limit on a movement in progress, if any,
+  #     :tacho_count        => internal count, number of counts since last reset of the motor counter,
+  #     :block_tacho_count  => current position relative to last programmed movement,
+  #     :rotation_count     => current position relative to last reset of the rotation sensor for this motor
+  #   }
+  def get_output_state(port)
+    cmd = [port]
+    resp = send_and_receive @@op_codes["get_output_state"], cmd
+
+    resp_parts = resp.from_hex_str.unpack('C6VVVV')
+    (7..9).each do |i|
+      resp_parts[i] = resp_parts[i].as_signed if resp_parts[i].kind_of? Bignum
+    end
+    
+    {
+      :port               => resp_parts[0],
+      :power              => resp_parts[1],
+      :mode               => resp_parts[2],
+      :reg_mode           => resp_parts[3],
+      :turn_ratio         => resp_parts[4],
+      :run_state          => resp_parts[5],
+      :tacho_limit        => resp_parts[6],
+      :tacho_count        => resp_parts[7],
+      :block_tacho_count  => resp_parts[8],
+      :rotation_count     => resp_parts[9]
+    }
+  end
   
   # Get the current values from an input sensor port.
   # * <tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
@@ -457,13 +524,11 @@ class NXTComm
     resp
   end
   
-  # TODO Write data to an LS port?
+  # Write data to lowspeed I2C port (for talking to the ultrasonic sensor)
   # * <tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
   # * <tt>tx_len</tt> - Tx data length (bytes)
   # * <tt>rx_len</tt> - Rx data length (bytes)
   # * <tt>data</tt> - Tx data
-  #
-  # Note: I'm not sure what LS communications are or how to test it, but this is what it says in the docs...
   #
   #   For LS communication on the NXT, data lengths are limited to 16 bytes per command.  Rx data length
   #   MUST be specified in the write command since reading from the device is done on a master-slave basis
@@ -472,15 +537,13 @@ class NXTComm
     send_and_receive @@op_codes["ls_write"], cmd
   end
   
-  # TODO Read data from an LS port?
+  # Read data from from lowspeed I2C port (for talking to the ultrasonic sensor)
   # * <tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
   # Returns a hash containing:
   #   {
   #     :bytes_read => number of bytes read
   #     :data       => Rx data (padded)
   #   }
-  #
-  # Note: I'm not sure what LS communications are or how to test it, but this is what it says in the docs...
   #
   #   For LS communication on the NXT, data lengths are limited to 16 bytes per command.
   #   Furthermore, this protocol does not support variable-length return packages, so the response
