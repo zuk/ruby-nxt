@@ -11,68 +11,68 @@ def sleeper
  sleep(0.5)
 end
 
-NXTComm.exec("/dev/tty.NXT-DevB-1") do |cmd|
+@nxt = NXTComm.new("/dev/tty.NXT-DevB-1")
 
-  #E  D C   D E   E  E
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(523,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  sleeper
-  #D  D   D     E   G  G
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(784,500)
-  sleeper
-  cmd.PlayTone(784,500)
-  sleeper
-  sleeper
-  #E  D C   D E   E  E
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(523,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  #E    D      D   E     D  C
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(659,500)
-  sleeper
-  cmd.PlayTone(587,500)
-  sleeper
-  cmd.PlayTone(523,750)
-  sleeper
-  sleeper
-  sleeper
+#E  D C   D E   E  E
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(523,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+sleeper
+#D  D   D     E   G  G
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(784,500)
+sleeper
+@nxt.play_tone(784,500)
+sleeper
+sleeper
+#E  D C   D E   E  E
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(523,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+#E    D      D   E     D  C
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(659,500)
+sleeper
+@nxt.play_tone(587,500)
+sleeper
+@nxt.play_tone(523,750)
+sleeper
+sleeper
+sleeper
 
-end
+@nxt.close

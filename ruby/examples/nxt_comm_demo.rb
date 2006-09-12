@@ -5,72 +5,62 @@ require 'yaml'
 
 $DEBUG = false
 
-NXTComm.exec("/dev/tty.NXT-DevB-1") do |cmd|
+@nxt = NXTComm.new("/dev/tty.NXT-DevB-1")
+puts "Connected!"
 
-  # StartProgram(filename)
-  # cmd.StartProgram("Try-Touch.rtm")
+puts "Starting program"
+@nxt.start_program("Try-Touch.rtm")
+sleep(5)
+puts "Currently running: " + @nxt.get_current_program_name
+puts "Stopping program"
+@nxt.stop_program
 
-  # StopProgram - stops any currently running programs
-  # cmd.StopProgram
+@nxt.play_sound_file("Good Job.rso")
 
-  # PlaySoundFile(loop?,filename)
-  # cmd.PlaySoundFile(false,"Good Job.rso")
+# @nxt.play_tone(50,500)
 
-  # PlayTone(frequency,duration)
-  # cmd.PlayTone(50,500)
-  
-  # SetOutputState(port,power,mode,regulation,turn ratio,run state,tacho limit)
-#   cmd.SetOutputState(
-#     NXTComm::MOTOR_B,
-#     100,
-#     NXTComm::MOTORON | NXTComm::BRAKE | NXTComm::REGULATED,
-#     NXTComm::REGULATION_MODE_MOTOR_SPEED,
-#     100,
-#     NXTComm::MOTOR_RUN_STATE_RUNNING,
-#     0
-#   )
-#   sleep(5)
-#   cmd.SetOutputState(
-#     NXTComm::MOTOR_B,
-#     100,
-#     NXTComm::MOTORON | NXTComm::BRAKE | NXTComm::REGULATED,
-#     NXTComm::REGULATION_MODE_MOTOR_SPEED,
-#     0,
-#     NXTComm::MOTOR_RUN_STATE_RAMPDOWN,
-#     0
-#   )
+# @nxt.set_output_state(
+#   NXTComm::MOTOR_B,
+#   100,
+#   NXTComm::MOTORON,
+#   NXTComm::REGULATION_MODE_MOTOR_SPEED,
+#   100,
+#   NXTComm::MOTOR_RUN_STATE_RUNNING,
+#   0
+# )
+# sleep(2)
+# @nxt.set_output_state(
+#   NXTComm::MOTOR_B,
+#   100,
+#   NXTComm::BRAKE,
+#   NXTComm::REGULATION_MODE_MOTOR_SPEED,
+#   0,
+#   NXTComm::MOTOR_RUN_STATE_RAMPDOWN,
+#   0
+# )
 
-  # SetInputMode(port,type,mode)
-  cmd.SetInputMode(NXTComm::SENSOR_3,NXTComm::LIGHT_INACTIVE,NXTComm::RAWMODE)
-  
-  while true
-	  s = cmd.GetInputValues(NXTComm::SENSOR_3)
-	  
-	  puts s.inspect
-	  sleep(1)
-  end
-  
-   #GetOutputState(motor_port)
-  #puts "GetOutputState: #{cmd.GetOutputState(NXTComm::MOTOR_B)}"
-  
-  # GetInputValues(sensor_port)
-  # cmd.GetInputValues(NXTComm::SENSOR_1)
-  
-  # ResetInputScaledValue(sensor_port)
-  # cmd.ResetInputScaledValue(NXTComm::SENSOR_1)
-  
-  # MessageWrite(mailbox,message)
-  # cmd.MessageWrite(1,"Chunky Robotic Bacon!")
-  
-  # ResetMotorPosition(motor_port,relative?)
-  # cmd.ResetMotorPosition(NXTComm::MOTOR_B,false)
-  
-  # GetBatteryLevel
-  #puts "Battery Level: #{cmd.GetBatteryLevel[0]/1000.0} V"
-  
-  # StopSoundPlayback - stops any currently playing sounds
-  #cmd.PlaySoundFile(true,"Woops.rso")
-  #sleep(3)
-  #cmd.StopSoundPlayback
-  
-end
+# set_input_mode(port,type,mode)
+# @nxt.set_input_mode(NXTComm::SENSOR_3,NXTComm::LIGHT_INACTIVE,NXTComm::RAWMODE)
+# while true
+#   s = @nxt.get_input_values(NXTComm::SENSOR_3)
+#   puts s.inspect
+#   sleep(1)
+# end
+
+# puts @nxt.get_output_state(NXTComm::MOTOR_B).inspect
+
+# puts @nxt.get_input_values(NXTComm::SENSOR_1).inspect
+
+# @nxt.reset_input_scaled_value(NXTComm::SENSOR_1)
+
+# @nxt.message_write(1,"Chunky Robotic Bacon!")
+
+# @nxt.reset_motor_position(NXTComm::MOTOR_B)
+
+# puts "Battery Level: #{@nxt.get_battery_level/1000.0} V"
+
+#@nxt.play_sound_file("Woops.rso",true)
+#sleep(2)
+#@nxt.stop_sound_playback
+
+@nxt.close

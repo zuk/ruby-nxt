@@ -39,13 +39,12 @@ class Brick
 
 		debug("#{self.class}::#{dev}(#{port})", :initialize)
 		
-		@nxt = NXTComm.connect(dev)
-		@nxt.start
+		@nxt = NXTComm.new(dev)
 	end
 	
 	# Closes the connection to the NXT and to other resources.
 	def disconnect
-		@nxt.stop
+		@nxt.close
 		@log.close
 	end
 
