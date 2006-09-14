@@ -1,5 +1,5 @@
 # ruby-nxt Control Mindstorms NXT via Bluetooth Serial Port Connection
-# Copyright (C) 2006 Tony Buser <tbuser@gmail.com> - juju.org
+# Copyright (C) 2006 Tony Buser <tbuser@gmail.com> - http://juju.org
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
