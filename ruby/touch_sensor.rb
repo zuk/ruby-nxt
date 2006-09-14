@@ -19,16 +19,17 @@ require 'yaml'
 require File.dirname(__FILE__)+'/sensor'
 
 class TouchSensor < Sensor
-	
-	def initialize(port, dev = $DEV)
-		super(port, dev)
-		set_input_mode(NXTComm::SWITCH, NXTComm::BOOLEANMODE)
-	end
-	
-	# Returns true if the touch sensor is pressed, false otherwise.
-	# (The sensor seems to read as "pressed" when it is pushed in about half way)
-	def is_pressed?
-		read_data[:scaled_value] == 1
-	end
-	
+  
+  def initialize(nxt, port = NXTComm::SENSOR_1)
+    super(nxt, port)
+    set_input_mode(NXTComm::SWITCH, NXTComm::BOOLEANMODE)
+  end
+  
+  # Returns true if the touch sensor is pressed, false otherwise.
+  # (The sensor seems to read as "pressed" when it is pushed in about half way)
+  def is_pressed?
+    read_data[:value_scaled] > 0
+  end
+  alias_method :pressed?, :is_pressed?
+  
 end

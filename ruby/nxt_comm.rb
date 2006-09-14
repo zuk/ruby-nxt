@@ -372,7 +372,7 @@ class NXTComm
     result = send_and_receive @@op_codes["get_output_state"], cmd
 
     if result
-      result_parts = result.from_hex_str.unpack('C6VVVV')
+      result_parts = result.from_hex_str.unpack('C6V4')
       (7..9).each do |i|
         result_parts[i] = result_parts[i].as_signed if result_parts[i].kind_of? Bignum
       end
@@ -413,7 +413,7 @@ class NXTComm
     result = send_and_receive @@op_codes["get_output_state"], cmd
 
     if result
-      result_parts = result.from_hex_str.unpack('C6VVVV')
+      result_parts = result.from_hex_str.unpack('C6V4')
       (7..9).each do |i|
         result_parts[i] = result_parts[i].as_signed if result_parts[i].kind_of? Bignum
       end
@@ -454,9 +454,15 @@ class NXTComm
     result = send_and_receive @@op_codes["get_input_values"], cmd
 
     if result
-      result_parts = result.from_hex_str.unpack('C5S2s2')
+      result_parts = result.from_hex_str.unpack('C5v4')
       result_parts[1] = 0x01 ? result_parts[1] = true : result_parts[1] = false
       result_parts[2] = 0x01 ? result_parts[2] = true : result_parts[2] = false
+
+			(7..8).each do |i|
+				# convert to signed word
+				# FIXME: is this right?
+        result_parts[i] = -1*(result_parts[i]^0xffff) if result_parts[i] > 0xfff
+      end
 
       {
         :port             => result_parts[0],

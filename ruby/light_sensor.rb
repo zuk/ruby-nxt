@@ -15,40 +15,31 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require 'yaml'
-require 'logger'
 
-require File.dirname(__FILE__)+'/nxt_comm'
+require File.dirname(__FILE__)+'/sensor'
 
-Logger::Formatter::Format = "%s, [%s#%d] %5s -- %s:\n%s\n"
-
-# Abstract parent class of motor and sensor bricks.
-# Currently provides only very basic common functionality but may
-# be expanded in the future.
-class Brick
-
-  attr_reader :port
-  attr_reader :log
-
-  def initialize(nxt, port)
-    logfile = File.expand_path(File.dirname(__FILE__))+"/log/#{self.class}_#{port}.log"
-    @log = Logger.new logfile
-    @log.level = Logger::DEBUG
-    #puts "Logging to #{logfile}"
-
-    debug("#{self.class}::#{nxt}(#{port})", :initialize)
-
-    @nxt = nxt
+class LightSensor < Sensor
+  
+  def initialize(nxt, port = NXTComm::SENSOR_3)
+    super(nxt, port)
+    use_illuminated_mode
   end
+  
+  # Get the current light level as a float from 0 to 1.0.
+  # 1.0 is maximum, 0 is minimum.
+  def get_light_level
+    # TODO: probably need to calibrate this... light level never really reaches 1023
+    (read_data[:value_scaled]).to_f / 1023.to_f
+  end
+  
 
-  private
-    def debug(msg, method = false)
-      @log.info(method) do 
-        if msg.kind_of? String
-          msg
-        else
-          msg.to_yaml
-        end
-      end
-    end
+  def use_illuminated_mode
+    set_input_mode(NXTComm::LIGHT_ACTIVE, NXTComm::RAWMODE)
+  end
+  
 
+  def use_ambient_mode
+    set_input_mode(NXTComm::LIGHT_INACTIVE, NXTComm::RAWMODE)
+  end
+  
 end
