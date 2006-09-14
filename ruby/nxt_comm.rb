@@ -188,42 +188,30 @@ class NXTComm
   }
   
   @@devs = {}
-  attr_reader :sp
-  
-  # This is the preferred method of obtaining an instance of NXTComm.
-  # You _must_ use this method if you plan to do any parallel communication
-  # with the NXT, otherwise you will end up making multiple connections
-  # to the same serial port... and bad things will happen :)
-  def self.connect(dev)	    
-    # we need to keep track of connections to make sure we don't have multiple instances of
-    # NXTComm talking to the same serial port
-   
-    if @@devs.include? dev and @@devs[dev].connected?
-    	@@devs[dev]
-    else
-    	@@devs[dev] = NXTComm.new(dev)
-    end
-  end
 
-	# Create a new instance of NXTComm, along with its own connection to
-	# the Bluetooth serialport.
-	# See NXTComm#connect, which manages serialport connections so you don't
-	# have to.
+	# Create a new instance of NXTComm.
+	# This NXTComm object will share its serialport connection
+	# IO object with all other instances. This way we can ensure thread
+	# safety for NXTComm instances in different threads.
   def initialize(dev)
     @dev = dev
     @sp = nil
 
+		@mutex = Mutex.new
+@mutex.synchronize do
   	begin
-    	@sp = SerialPort.new(@dev, 57600, 8, 1, SerialPort::NONE)
+  		if @@devs.include? dev and not @@devs[dev].closed?
+  			@sp = @@devs[dev]
+  		else
+    		@@devs[dev] = @sp = SerialPort.new(@dev, 57600, 8, 1, SerialPort::NONE)
+    	end
     rescue Errno::EBUSY
     	raise "Cannot connect to #{@dev}. The serial port is busy or unavailable."
     end
     
     @sp.flow_control = SerialPort::HARD
     @sp.read_timeout = 5000
-    
-    @mutex = Mutex.new
-    
+end
     if @sp.nil?
       $stderr.puts "Cannot connect to #{@dev}"
     else
