@@ -45,15 +45,22 @@ require File.dirname(__FILE__)+'/motor'
 # 
 class NXT
 
-	# Initialize the NXT. Currently only motor functionality is implemented.
+	# Initialize the NXT. This creates three Motor instances and one kind of each sensor.
+	# It is assumed that the sensors are connected to the standard ports as follows:
+	# * Port 1: Touch
+	# * Port 2: Sound
+	# * Port 3: Light
+	# * Port 4: Ultrasonic
 	# You can specify the path to the serialport device (e.g. '/dev/tty.NXT-DevB-1')
 	# or omit the argument to use the serialport device specified in the global
 	# $DEV variable.
 	def initialize(dev = $DEV)
+		@nxt = NXTComm.new(dev)
+		
 		@motors = {}
-		@motors[:a] = Motor.new(:a, dev)
-		@motors[:b] = Motor.new(:b, dev)
-		@motors[:c] = Motor.new(:c, dev)
+		@motors[:a] = Motor.new(@nxt, :a)
+		@motors[:b] = Motor.new(@nxt, :b)
+		@motors[:c] = Motor.new(@nxt, :c)
 		
 		@motor_threads = {}
 	end
@@ -121,7 +128,7 @@ class NXT
 	# to the NXT.
 	def disconnect
 		@motor_threads.each {|i,t| t.join}
-		@motors.each {|i,m| m.disconnect}
+		@nxt.close
 	end
 
 end

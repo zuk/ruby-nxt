@@ -32,8 +32,8 @@ class Motor < Brick
 	
 	attr_accessor :ratio
 	
-	def initialize(port, dev = $DEV)
-		super(port, dev)
+	def initialize(nxt, port)
+		super(nxt, port)
 		
 		@port = formalize_motor_port_name(port)
 		
@@ -77,35 +77,11 @@ class Motor < Brick
 	end
 	
 	# Return the current state of the motor as a hash.
-	# The data available is as follows:
-	# [+:port+] Motor's port. This will always be equal to +self.port+. 
-	# [+:power+] Current power setting. 0 to 100.
-	# [+:mode+] Current output mode. See NXTComm constants.
-	# [+:regulation+] Current power regulation mode. See NXTComm constants.
-	# [+:ratio+] Gear scaling ratio. This should always be equal to +self.ratio+.
-	# [+:run_state+] Current output run state. See NXTComm constants.
-	# [+:degree_limit+] The rotation limit previously set. 0 means no limit.
-	# [+:tacho_count+] Internal tachometer count.
-	# [+:tacho_count_block+] Total relative rotation count (for the motor or the nxt??)
-	# [+:degree_count+] The total relative degrees turned since the last Motor#reset_tacho call.
-	# 									Turning backwards adds negative values, so this can go negative.
+	# See NXTComm#get_output_state for info on what data is available here.
 	def read_state
 		@log.debug(:read_state) { "getting state"}
-		r = @nxt.GetOutputState(@port)
+		state = @nxt.get_output_state(@port)
 		@log.debug(:read_state) { "got state" }
-	
-		state = {
-			:port => r[0],
-			:power => r[1],
-			:mode => r[2],
-			:regulation => r[3],
-			:ratio => r[4],
-			:run_state => r[5],
-			:degree_limit => r[6],
-			:tacho_count => r[7],
-			:tacho_count_block => r[8],
-			:degree_count => r[9]
-		}
 		
 		debug(state, :state)
 		
@@ -171,7 +147,7 @@ class Motor < Brick
 		mode |= NXTComm::REGULATED if regulate
 
 		@log.debug(:run) {"sending run command"}
-		@nxt.SetOutputState(@port, power, mode, NXTComm::REGULATION_MODE_IDLE, ratio, NXTComm::MOTOR_RUN_STATE_RUNNING, degrees)
+		@nxt.set_output_state(@port, power, mode, NXTComm::REGULATION_MODE_IDLE, ratio, NXTComm::MOTOR_RUN_STATE_RUNNING, degrees)
   
 	  if time.nil?
 			@log.debug(:run) {"sleeping until run_state is idle"}
@@ -192,13 +168,13 @@ class Motor < Brick
 	# Stop movement.
 	def stop
 		debug(nil, :stop)
-		@nxt.SetOutputState(@port, 100, NXTComm::BRAKE, NXTComm::REGULATION_MODE_MOTOR_SPEED, 100, NXTComm::MOTOR_RUN_STATE_IDLE, 0)
+		@nxt.set_output_state(@port, 100, NXTComm::BRAKE, NXTComm::REGULATION_MODE_MOTOR_SPEED, 100, NXTComm::MOTOR_RUN_STATE_IDLE, 0)
 	end
 	
 	# Resets the motor's tachometer movement count (i.e. +:degree_count+ in Motor#state).
 	def reset_tacho
 		@log.debug(:reset_tacho) { "resetting tacho" }
-		@nxt.ResetMotorPosition(@port, false)
+		@nxt.reset_motor_position(@port, false)
 		@log.debug(:reset_tacho) { "reset tacho" }
 	end
 	

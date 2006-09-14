@@ -13,11 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
+$COLORS = [:red, :green, :yellow, :blue, :magenta, :cyan]
+srand = 123
 # http://raa.ruby-lang.org/project/ruby-serialport/
 require "serialport"
 require "thread"
-
+require 'rubygems'
+require_gem 'term-ansicolor'
 class Array
   def to_hex_str
     self.collect{|e| "0x%02x " % e}
@@ -32,10 +34,10 @@ class String
   end
   
   def from_hex_str
-  	data = self.split(' ')
-  	str = ""
-  	data.each{|h| eval "str += '%c' % #{h}"}
-  	str
+    data = self.split(' ')
+    str = ""
+    data.each{|h| eval "str += '%c' % #{h}"}
+    str
   end
 end
 
@@ -44,7 +46,7 @@ class Bignum
   # instead we unpack() as a little-endian unsigned long (i.e. 'V') and then use this
   # method to convert to signed long.
   def as_signed
-  	-1*(self^0xffffffff) if self > 0xfffffff
+    -1*(self^0xffffffff) if self > 0xfffffff
   end
 end
 
@@ -187,48 +189,42 @@ class NXTComm
     0xFF => "Bad arguments"
   }
   
-  @@devs = {}
+  @@mutex = Mutex.new
 
-	# Create a new instance of NXTComm.
-	# This NXTComm object will share its serialport connection
-	# IO object with all other instances. This way we can ensure thread
-	# safety for NXTComm instances in different threads.
+  # Create a new instance of NXTComm.
+  # Be careful not to create more than one NXTComm object per serial port dev.
+  # If two NXTComms try to talke to the same dev, there will be trouble. 
   def initialize(dev)
-    @dev = dev
-    @sp = nil
-
-		@mutex = Mutex.new
-@mutex.synchronize do
-  	begin
-  		if @@devs.include? dev and not @@devs[dev].closed?
-  			@sp = @@devs[dev]
-  		else
-    		@@devs[dev] = @sp = SerialPort.new(@dev, 57600, 8, 1, SerialPort::NONE)
-    	end
-    rescue Errno::EBUSY
-    	raise "Cannot connect to #{@dev}. The serial port is busy or unavailable."
-    end
+  
+		@@mutex.synchronize do
+	    begin
+		    @sp = SerialPort.new(dev, 57600, 8, 1, SerialPort::NONE)
+		  
+		    @sp.flow_control = SerialPort::HARD
+		    @sp.read_timeout = 5000
+	    rescue Errno::EBUSY
+	      raise "Cannot connect to #{dev}. The serial port is busy or unavailable."
+	    end
+	    
+		end
     
-    @sp.flow_control = SerialPort::HARD
-    @sp.read_timeout = 5000
-end
     if @sp.nil?
-      $stderr.puts "Cannot connect to #{@dev}"
+      $stderr.puts "Cannot connect to #{dev}"
     else
-      puts "Connected to: #{@dev}" if $DEBUG
+      puts "Connected to: #{dev}" if $DEBUG
     end
   end
 
   # Close the connection
   def close
-  	@mutex.synchronize do
-    	@sp.close if @sp and not @sp.closed?
-  	end
+    @@mutex.synchronize do
+      @sp.close if @sp and not @sp.closed?
+    end
   end
   
   # Returns true if the connection to the NXT is open; false otherwise
   def connected?
-  	not @sp.closed?
+    not @sp.closed?
   end
 
   # Send message and return response
@@ -253,36 +249,35 @@ end
   
   # Send direct command bytes
   def send_cmd(msg)
-  	@mutex.synchronize do
-	  	msg = [0x00] + msg # always request a response
-	    #puts "Message Size: #{msg.size}" if $DEBUG
-	    msg = [(msg.size & 255),(msg.size >> 8)] + msg
-	    puts "Sending Message: #{msg.to_hex_str}" if $DEBUG
-	    msg.each do |b|
-	      @sp.putc b
-	    end
-	  end
+    @@mutex.synchronize do
+      msg = [0x00] + msg # always request a response
+      #puts "Message Size: #{msg.size}" if $DEBUG
+      msg = [(msg.size & 255),(msg.size >> 8)] + msg
+      msg.each do |b|
+        @sp.putc b
+      end
+    end
   end
   
   # Process the reply
   def recv_reply
-  	@mutex.synchronize do
-	    while (len_header = @sp.sysread(2))
-	      msg = @sp.sysread(len_header.unpack("v")[0])
-	      puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
-	      
-	      if msg[0] != 0x02
-	        $stderr.puts "ERROR: Returned something other then a reply telegram"
-	        return [0,msg]
-	      end
-	      
-	      if msg[2] != 0x00
-	        $stderr.puts "ERROR: #{@@error_codes[msg[2]]}"
-	        return [0,msg]
-	      end
-	      
-	      return[msg.size,msg]
-	    end
+    @@mutex.synchronize do
+      while (len_header = @sp.sysread(2))
+        msg = @sp.sysread(len_header.unpack("v")[0])
+        puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
+        
+        if msg[0] != 0x02
+          $stderr.puts "ERROR: Returned something other then a reply telegram"
+          return [0,msg]
+        end
+        
+        if msg[2] != 0x00
+          $stderr.puts "ERROR: #{@@error_codes[msg[2]]}"
+          return [0,msg]
+        end
+        
+        return[msg.size,msg]
+      end
     end
   end
 

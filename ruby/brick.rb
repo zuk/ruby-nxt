@@ -29,23 +29,15 @@ class Brick
 	attr_reader :port
 	attr_reader :log
 
-	# Initializes the logger for this brick and establiesh the Bluetooth
-	# connection to the NXT.
-	def initialize(port, dev = $DEV)
-		logfile = File.expand_path(File.dirname(__FILE__))+"/#{self.class}_#{port}.log"
+	def initialize(nxt, port)
+		logfile = File.expand_path(File.dirname(__FILE__))+"/log/#{self.class}_#{port}.log"
 		@log = Logger.new logfile
 		@log.level = Logger::DEBUG
 		#puts "Logging to #{logfile}"
 
-		debug("#{self.class}::#{dev}(#{port})", :initialize)
-		
-		@nxt = NXTComm.new(dev)
-	end
-	
-	# Closes the connection to the NXT and to other resources.
-	def disconnect
-		@nxt.close
-		@log.close
+		debug("#{self.class}::#{nxt}(#{port})", :initialize)
+
+		@nxt = nxt
 	end
 
 	private

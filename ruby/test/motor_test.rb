@@ -5,11 +5,13 @@ $DEV = '/dev/tty.NXT-DevB-1'
 
 class MotorTest < Test::Unit::TestCase
 
+	@@nxt = NXTComm.new($DEV)
+
 	def setup
 		@motors = []
-		@motors << Motor.new('a')
-		@motors << Motor.new('b')
-		@motors << Motor.new('c')
+		@motors << Motor.new(@@nxt, :a)
+		@motors << Motor.new(@@nxt, :b)
+		@motors << Motor.new(@@nxt, :c)
 		
 		# make sure that we can talk to each of the motors before we try to run any tests
 #		@motors.each do |m|
@@ -21,7 +23,6 @@ class MotorTest < Test::Unit::TestCase
 	end
 	
 	def teardown
-		@motors.each {|m| m.disconnect}
 	end
 	
 	def test_name
@@ -36,14 +37,7 @@ class MotorTest < Test::Unit::TestCase
 		assert_not_nil state
 		assert_equal @motors.first.port, state[:port]
 	
-		# now do all motors (in parallel, since each should launch its own thread)
-		@motors.each do |m|
-			state = m.read_state
-			assert_not_nil state
-			assert_equal m.port, state[:port]
-		end
-		
-		# run it again to make sure we can do it consecutively
+		# now do all motors
 		@motors.each do |m|
 			state = m.read_state
 			assert_not_nil state
@@ -62,7 +56,7 @@ class MotorTest < Test::Unit::TestCase
 		@motors.each do |m|
 			m.reset_tacho
 			state = m.read_state
-			assert_equal 0, state[:degree_count]
+			assert_equal 0, state[:rotation_count]
 		end
 	end
   
@@ -73,12 +67,12 @@ class MotorTest < Test::Unit::TestCase
 	  	m.reset_tacho
 	  	m.forward(:degrees => 360, :power => 10)
 	  	state = m.read_state
-	  	assert_in_delta(360, state[:degree_count], 30)
+	  	assert_in_delta(360, state[:rotation_count], 35)
 	  	
 	  	m.reset_tacho
 	  	m.backward(:degrees => 360, :power => 10)
 	  	state = m.read_state
-	  	assert_in_delta(-360, state[:degree_count], 30)
+	  	assert_in_delta(-360, state[:rotation_count], 35)
   	end
   end
   
@@ -87,12 +81,12 @@ class MotorTest < Test::Unit::TestCase
 	  	m.reset_tacho
 	  	m.forward(:time => 3, :power => 15)
 	  	state = m.read_state
-	  	assert_in_delta(344, state[:degree_count], 50)
+	  	assert_in_delta(344, state[:rotation_count], 50)
 	  	
 	  	m.reset_tacho
 	  	m.backward(:time => 3, :power => 15)
 	  	state = m.read_state
-	  	assert_in_delta(-344, state[:degree_count], 50)
+	  	assert_in_delta(-344, state[:rotation_count], 50)
 	  end
   end
   

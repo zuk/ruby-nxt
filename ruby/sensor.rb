@@ -29,8 +29,8 @@ class Sensor < Brick
 	# 			class?)
 	
 	
-	def initialize(port, dev = $DEV)
-		super(port, dev)
+	def initialize(nxt, port)
+		super(nxt, port)
 		@port = port
 	end
 	
@@ -58,7 +58,15 @@ class Sensor < Brick
 				:calibrated_value => raw[8]
 			}
 		
+		debug(data.inspect, :read_data)
 		return data
+	end
+	
+	def disconnect
+		# Turns off the sensor before disconnecting (for example we turn off
+		# the red light on the light sensor this way).
+		set_input_mode(NXTComm::NO_SENSOR, NXTComm::RAWMODE)
+		super
 	end
 	
 end
