@@ -1,5 +1,5 @@
 require 'test/unit'
-require File.dirname(__FILE__)+'/../motor'
+require File.dirname(__FILE__)+'/../../motor'
 
 $DEV = '/dev/tty.NXT-DevB-1'
 
