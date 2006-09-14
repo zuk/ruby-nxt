@@ -14,14 +14,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-#$COLORS = [:red, :green, :yellow, :blue, :magenta, :cyan]
-#srand = 123
-
 # http://raa.ruby-lang.org/project/ruby-serialport/
 require "serialport"
 require "thread"
-#require 'rubygems'
-#require_gem 'term-ansicolor'
 
 class Array
   def to_hex_str
