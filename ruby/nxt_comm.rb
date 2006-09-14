@@ -13,13 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-$COLORS = [:red, :green, :yellow, :blue, :magenta, :cyan]
-srand = 123
+
+#$COLORS = [:red, :green, :yellow, :blue, :magenta, :cyan]
+#srand = 123
+
 # http://raa.ruby-lang.org/project/ruby-serialport/
 require "serialport"
 require "thread"
-require 'rubygems'
-require_gem 'term-ansicolor'
+#require 'rubygems'
+#require_gem 'term-ansicolor'
+
 class Array
   def to_hex_str
     self.collect{|e| "0x%02x " % e}
@@ -205,7 +208,6 @@ class NXTComm
 	    rescue Errno::EBUSY
 	      raise "Cannot connect to #{dev}. The serial port is busy or unavailable."
 	    end
-	    
 		end
     
     if @sp.nil?
@@ -232,17 +234,20 @@ class NXTComm
     msg = [op] + cmd + [0x00]
     
     send_cmd(msg)
-    len,ret = recv_reply
+    ok,response = recv_reply
     
-    if (ret[1] == op)
-      data = ret[3..ret.size]
+    if ok and response[1] == op
+      data = response[3..response.size]
       # TODO ? if data contains a \n character, ruby seems to pass the parts before and after the \n
       # as two different parameters... we need to encode the data into a format that doesn't
       # contain any \n's and then decode it in the receiving method
       data = data.to_hex_str
+    elsif !ok
+      $stderr.puts response
+      data = false
     else
-      $stderr.puts "ERROR: Could not decode returned msg for #{cmd_str}"
-      data = nil
+      $stderr.puts "ERROR: Unexpected response #{response}"
+      data = false
     end
     data
   end
@@ -253,6 +258,7 @@ class NXTComm
       msg = [0x00] + msg # always request a response
       #puts "Message Size: #{msg.size}" if $DEBUG
       msg = [(msg.size & 255),(msg.size >> 8)] + msg
+      puts "Sending Message: #{msg.to_hex_str}" if $DEBUG
       msg.each do |b|
         @sp.putc b
       end
@@ -261,23 +267,23 @@ class NXTComm
   
   # Process the reply
   def recv_reply
-    @@mutex.synchronize do
-      while (len_header = @sp.sysread(2))
-        msg = @sp.sysread(len_header.unpack("v")[0])
-        puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
-        
-        if msg[0] != 0x02
-          $stderr.puts "ERROR: Returned something other then a reply telegram"
-          return [0,msg]
-        end
-        
-        if msg[2] != 0x00
-          $stderr.puts "ERROR: #{@@error_codes[msg[2]]}"
-          return [0,msg]
-        end
-        
-        return[msg.size,msg]
-      end
+  	@@mutex.synchronize do
+	    while (len_header = @sp.sysread(2))
+	      msg = @sp.sysread(len_header.unpack("v")[0])
+	      puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
+	      
+	      if msg[0] != 0x02
+	        error = "ERROR: Returned something other then a reply telegram"
+	        return [false,error]
+	      end
+	      
+	      if msg[2] != 0x00
+	        error = "ERROR: #{@@error_codes[msg[2]]}"
+	        return [false,error]
+	      end
+	      
+	      return [true,msg]
+	    end
     end
   end
 
@@ -288,13 +294,17 @@ class NXTComm
     name.each_byte do |b|
       cmd << b
     end
-    send_and_receive @@op_codes["start_program"], cmd
+    result = send_and_receive @@op_codes["start_program"], cmd
+    result = true if result == ""
+    result
   end
 
   # Stop any programs currently running on the NXT.
   def stop_program
     cmd = []
-    send_and_receive @@op_codes["stop_program"], cmd
+    result = send_and_receive @@op_codes["stop_program"], cmd
+    result = true if result == ""
+    result
   end
 
   # Play a sound file stored on the NXT.
@@ -306,7 +316,9 @@ class NXTComm
     name.each_byte do |b|
       cmd << b
     end
-    send_and_receive @@op_codes["play_sound_file"], cmd
+    result = send_and_receive @@op_codes["play_sound_file"], cmd
+    result = true if result == ""
+    result
   end
 
   # Play a tone.
@@ -314,7 +326,9 @@ class NXTComm
   # * <tt>dur</tt> - duration for the tone in ms
   def play_tone(freq,dur)
     cmd = [(freq & 255),(freq >> 8),(dur & 255),(dur >> 8)]
-    send_and_receive @@op_codes["play_tone"], cmd
+    result = send_and_receive @@op_codes["play_tone"], cmd
+    result = true if result == ""
+    result
   end
 
   # Set various parameters for the output motor port(s).
@@ -327,7 +341,9 @@ class NXTComm
   # * <tt>tacho_limit</tt> - tacho limit (number, 0 - run forever)
   def set_output_state(port,power,mode,reg_mode,turn_ratio,run_state,tacho_limit)
     cmd = [port,power,mode,reg_mode,turn_ratio,run_state] + [tacho_limit].pack("V").unpack("C4")
-    send_and_receive @@op_codes["set_output_state"], cmd
+    result = send_and_receive @@op_codes["set_output_state"], cmd
+    result = true if result == ""
+    result
   end
 
   # Set various parameters for an input sensor port.
@@ -336,7 +352,9 @@ class NXTComm
   # * <tt>mode</tt> - sensor mode (RAWMODE, BOOLEANMODE, TRANSITIONCNTMODE, PERIODCOUNTERMODE, PCTFULLSCALEMODE, CELSIUSMODE, FAHRENHEITMODE, ANGLESTEPMODE, SLOPEMASK, MODEMASK)
   def set_input_mode(port,type,mode)
     cmd = [port,type,mode]
-    send_and_receive @@op_codes["set_input_mode"], cmd
+    result = send_and_receive @@op_codes["set_input_mode"], cmd
+    result = true if result == ""
+    result
   end
   
   # Get the state of the output motor port.
@@ -356,25 +374,29 @@ class NXTComm
   #   }
   def get_output_state(port)
     cmd = [port]
-    resp = send_and_receive @@op_codes["get_output_state"], cmd
+    result = send_and_receive @@op_codes["get_output_state"], cmd
 
-    resp_parts = resp.from_hex_str.unpack('C6VVVV')
-    (7..9).each do |i|
-      resp_parts[i] = resp_parts[i].as_signed if resp_parts[i].kind_of? Bignum
-    end
+    if result
+      result_parts = result.from_hex_str.unpack('C6VVVV')
+      (7..9).each do |i|
+        result_parts[i] = result_parts[i].as_signed if result_parts[i].kind_of? Bignum
+      end
     
-    {
-      :port               => resp_parts[0],
-      :power              => resp_parts[1],
-      :mode               => resp_parts[2],
-      :reg_mode           => resp_parts[3],
-      :turn_ratio         => resp_parts[4],
-      :run_state          => resp_parts[5],
-      :tacho_limit        => resp_parts[6],
-      :tacho_count        => resp_parts[7],
-      :block_tacho_count  => resp_parts[8],
-      :rotation_count     => resp_parts[9]
-    }
+      {
+        :port               => result_parts[0],
+        :power              => result_parts[1],
+        :mode               => result_parts[2],
+        :reg_mode           => result_parts[3],
+        :turn_ratio         => result_parts[4],
+        :run_state          => result_parts[5],
+        :tacho_limit        => result_parts[6],
+        :tacho_count        => result_parts[7],
+        :block_tacho_count  => result_parts[8],
+        :rotation_count     => result_parts[9]
+      }
+    else
+      false
+    end
   end
   # Get the state of the output motor port.
   # * <tt>port</tt> - output port (MOTOR_A, MOTOR_B, MOTOR_C)
@@ -393,25 +415,29 @@ class NXTComm
   #   }
   def get_output_state(port)
     cmd = [port]
-    resp = send_and_receive @@op_codes["get_output_state"], cmd
+    result = send_and_receive @@op_codes["get_output_state"], cmd
 
-    resp_parts = resp.from_hex_str.unpack('C6VVVV')
-    (7..9).each do |i|
-      resp_parts[i] = resp_parts[i].as_signed if resp_parts[i].kind_of? Bignum
-    end
+    if result
+      result_parts = result.from_hex_str.unpack('C6VVVV')
+      (7..9).each do |i|
+        result_parts[i] = result_parts[i].as_signed if result_parts[i].kind_of? Bignum
+      end
     
-    {
-      :port               => resp_parts[0],
-      :power              => resp_parts[1],
-      :mode               => resp_parts[2],
-      :reg_mode           => resp_parts[3],
-      :turn_ratio         => resp_parts[4],
-      :run_state          => resp_parts[5],
-      :tacho_limit        => resp_parts[6],
-      :tacho_count        => resp_parts[7],
-      :block_tacho_count  => resp_parts[8],
-      :rotation_count     => resp_parts[9]
-    }
+      {
+        :port               => result_parts[0],
+        :power              => result_parts[1],
+        :mode               => result_parts[2],
+        :reg_mode           => result_parts[3],
+        :turn_ratio         => result_parts[4],
+        :run_state          => result_parts[5],
+        :tacho_limit        => result_parts[6],
+        :tacho_count        => result_parts[7],
+        :block_tacho_count  => result_parts[8],
+        :rotation_count     => result_parts[9]
+      }
+    else
+      false
+    end
   end
   
   # Get the current values from an input sensor port.
@@ -430,30 +456,36 @@ class NXTComm
   #   }
   def get_input_values(port)
     cmd = [port]
-    resp = send_and_receive @@op_codes["get_input_values"], cmd
+    result = send_and_receive @@op_codes["get_input_values"], cmd
 
-    resp_parts = resp.from_hex_str.unpack('C5S2s2')
-    resp_parts[1] = 0x01 ? resp_parts[1] = true : resp_parts[1] = false
-    resp_parts[2] = 0x01 ? resp_parts[2] = true : resp_parts[2] = false
+    if result
+      result_parts = result.from_hex_str.unpack('C5S2s2')
+      result_parts[1] = 0x01 ? result_parts[1] = true : result_parts[1] = false
+      result_parts[2] = 0x01 ? result_parts[2] = true : result_parts[2] = false
 
-    {
-      :port             => resp_parts[0],
-      :valid            => resp_parts[1],
-      :calibrated       => resp_parts[2],
-      :type             => resp_parts[3],
-      :mode             => resp_parts[4],
-      :value_raw        => resp_parts[5],
-      :value_normal     => resp_parts[6],
-      :value_scaled     => resp_parts[7],
-      :value_calibrated => resp_parts[8],
-    }
+      {
+        :port             => result_parts[0],
+        :valid            => result_parts[1],
+        :calibrated       => result_parts[2],
+        :type             => result_parts[3],
+        :mode             => result_parts[4],
+        :value_raw        => result_parts[5],
+        :value_normal     => result_parts[6],
+        :value_scaled     => result_parts[7],
+        :value_calibrated => result_parts[8],
+      }
+    else
+      false
+    end
   end
 
   # Reset the scaled value on an input sensor port.
   # * <tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
   def reset_input_scaled_value(port)
     cmd = [port]
-    send_and_receive @@op_codes["reset_input_scaled_value"], cmd
+    result = send_and_receive @@op_codes["reset_input_scaled_value"], cmd
+    result = true if result == ""
+    result
   end
 
   # Write a message to a specific inbox on the NXT.  This is used to send a message to a currently running program.
@@ -466,7 +498,9 @@ class NXTComm
     message.each_byte do |b|
       cmd << b
     end
-    send_and_receive @@op_codes["message_write"], cmd
+    result = send_and_receive @@op_codes["message_write"], cmd
+    result = true if result == ""
+    result
   end
 
   # Reset the position of an output motor port.
@@ -476,35 +510,39 @@ class NXTComm
     cmd = []
     cmd << port
     relative ? cmd << 0x01 : cmd << 0x00
-    send_and_receive @@op_codes["reset_motor_position"], cmd
+    result = send_and_receive @@op_codes["reset_motor_position"], cmd
+    result = true if result == ""
+    result
   end
   
   # Returns the battery voltage in millivolts.
   def get_battery_level
     cmd = []
-    resp = send_and_receive @@op_codes["get_battery_level"], cmd
-    resp.from_hex_str.unpack("v")[0]
+    result = send_and_receive @@op_codes["get_battery_level"], cmd
+    result == false ? false : result.from_hex_str.unpack("v")[0]
   end
 
   # Stop any currently playing sounds.
   def stop_sound_playback
     cmd = []
-    send_and_receive @@op_codes["stop_sound_playback"], cmd
+    result = send_and_receive @@op_codes["stop_sound_playback"], cmd
+    result = true if result == ""
+    result
   end
 
   # Keep the connection alive? Also, returns the current sleep time limit in ms
   def keep_alive
     cmd = []
-    resp = send_and_receive @@op_codes["keep_alive"], cmd
-    resp.from_hex_str.unpack("L")[0]
+    result = send_and_receive @@op_codes["keep_alive"], cmd
+    result == false ? false : result.from_hex_str.unpack("L")[0]
   end
 
   # TODO Get the status of an LS port?  Returns the count of available bytes to read.
   # * <tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
   def ls_get_status(port)
     cmd = [port]
-    resp = send_and_receive @@op_codes["ls_get_status"], cmd
-    resp
+    result = send_and_receive @@op_codes["ls_get_status"], cmd
+    result
   end
   
   # Write data to lowspeed I2C port (for talking to the ultrasonic sensor)
@@ -517,7 +555,9 @@ class NXTComm
   #   MUST be specified in the write command since reading from the device is done on a master-slave basis
   def ls_write(port,tx_len,rx_len,data)
     cmd = [port,tx_len,rx_len,data]
-    send_and_receive @@op_codes["ls_write"], cmd
+    result = send_and_receive @@op_codes["ls_write"], cmd
+    result = true if result == ""
+    result
   end
   
   # Read data from from lowspeed I2C port (for talking to the ultrasonic sensor)
@@ -533,29 +573,33 @@ class NXTComm
   #   will always contain 16 data bytes, with invalid data bytes padded with zeroes.
   def ls_read(port)
     cmd = [port]
-    resp = send_and_receive @@op_codes["ls_read"], cmd
-    {
-      :bytes_read => resp[0],
-      :data       => resp[1..-1]
-    }
+    result = send_and_receive @@op_codes["ls_read"], cmd
+    if result
+      {
+        :bytes_read => result[0],
+        :data       => result[1..-1]
+      }
+    else
+      false
+    end
   end
   
   # Returns the name of the program currently running on the NXT.
   # Returns an error If no program is running.
   def get_current_program_name
     cmd = []
-    resp = send_and_receive @@op_codes["get_current_program_name"], cmd
-    resp.from_hex_str.unpack("A*")[0]
+    result = send_and_receive @@op_codes["get_current_program_name"], cmd
+    result == false ? false : result.from_hex_str.unpack("A*")[0]
   end
 
   # Read a message from a specific inbox on the NXT.
   # * <tt>inbox_remote</tt> - remote inbox number (1 - 10)
   # * <tt>inbox_local</tt> - local inbox number (1 - 10) (not sure why you need this?)
   # * <tt>remove</tt> - boolean, true - clears message from remote inbox
-  def message_read(inbox_remote,inbox_local,remove = false)
+  def message_read(inbox_remote,inbox_local = 1,remove = false)
     cmd = [inbox_remote, inbox_local]
     remove ? cmd << 0x01 : cmd << 0x00
-    resp = send_and_receive @@op_codes["message_read"], cmd
-    resp[2..-1].from_hex_str.unpack("A*")[0]
+    result = send_and_receive @@op_codes["message_read"], cmd
+    result == false ? false : result[2..-1].from_hex_str.unpack("A*")[0]
   end
 end

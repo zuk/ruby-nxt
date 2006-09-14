@@ -10,34 +10,34 @@ puts "Connected!"
 
 puts "Starting program"
 @nxt.start_program("Try-Touch.rtm")
-sleep(5)
+sleep(3)
 puts "Currently running: " + @nxt.get_current_program_name
 puts "Stopping program"
 @nxt.stop_program
 
 @nxt.play_sound_file("Good Job.rso")
 
-# @nxt.play_tone(50,500)
+@nxt.play_tone(500,500)
 
-# @nxt.set_output_state(
-#   NXTComm::MOTOR_B,
-#   100,
-#   NXTComm::MOTORON,
-#   NXTComm::REGULATION_MODE_MOTOR_SPEED,
-#   100,
-#   NXTComm::MOTOR_RUN_STATE_RUNNING,
-#   0
-# )
-# sleep(2)
-# @nxt.set_output_state(
-#   NXTComm::MOTOR_B,
-#   100,
-#   NXTComm::BRAKE,
-#   NXTComm::REGULATION_MODE_MOTOR_SPEED,
-#   0,
-#   NXTComm::MOTOR_RUN_STATE_RAMPDOWN,
-#   0
-# )
+@nxt.set_output_state(
+  NXTComm::MOTOR_A,
+  100,
+  NXTComm::MOTORON,
+  NXTComm::REGULATION_MODE_MOTOR_SPEED,
+  100,
+  NXTComm::MOTOR_RUN_STATE_RUNNING,
+  0
+)
+sleep(3)
+@nxt.set_output_state(
+  NXTComm::MOTOR_A,
+  100,
+  NXTComm::BRAKE,
+  NXTComm::REGULATION_MODE_MOTOR_SPEED,
+  0,
+  NXTComm::MOTOR_RUN_STATE_RAMPDOWN,
+  0
+)
 
 # set_input_mode(port,type,mode)
 # @nxt.set_input_mode(NXTComm::SENSOR_3,NXTComm::LIGHT_INACTIVE,NXTComm::RAWMODE)
