@@ -1,6 +1,7 @@
 require File.dirname(__FILE__)+'/../../touch_sensor'
 require File.dirname(__FILE__)+'/../../light_sensor'
 require File.dirname(__FILE__)+'/../../sound_sensor'
+require File.dirname(__FILE__)+'/../../ultrasonic_sensor'
 
 require File.dirname(__FILE__)+'/interactive_test_helper.rb'
 
@@ -90,5 +91,30 @@ pass "OK, light level was below 20%"
 pass "All light sensor tests passed!"
 
 l.off
+
+### ultrasonic sensor ######
+
+info "Initializing ultrasonic sensor..."
+u = UltrasonicSensor.new(nxt)
+
+notice "Point the ultrasonic sensor into the far distance -- at least 2 meters (7 feet)..."
+u.wait_for_event(-1, "=") do
+	d = u.get_distance_in_cm
+	meter(d, "Distance (cm)", nil, 150, -1)
+	d
+end
+puts
+pass "OK, the sensor says it can't determine the distance (it can't pick up anything over 2 meters away or anything very very close)."
+
+notice "Now point the ultrasonic sensor at something less than 5 cm (2 inches) away..."
+u.wait_for_event(5, "<=") do
+	d = u.get_distance_in_cm
+	meter(d, "Distance (cm)", 5, 150, -1)
+	(d < 0 ? 1000000 : d)
+end
+puts
+pass "OK, the sensor detected an object 5 cm or less away."
+
+u.off
 
 nxt.close
