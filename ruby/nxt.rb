@@ -17,6 +17,11 @@
 require File.dirname(__FILE__)+'/nxt_comm'
 require File.dirname(__FILE__)+'/motor'
 
+require File.dirname(__FILE__)+'/touch_sensor'
+require File.dirname(__FILE__)+'/sound_sensor'
+require File.dirname(__FILE__)+'/light_sensor'
+require File.dirname(__FILE__)+'/ultrasonic_sensor'
+
 # High-level interface for controlling motors and sensors connected to the NXT.
 # Currently only motors and some other misc functionality is implemented.
 # 
@@ -62,7 +67,14 @@ class NXT
     @motors[:b] = Motor.new(@nxt, :b)
     @motors[:c] = Motor.new(@nxt, :c)
     
+    @sensors = {}
+    @sensors[1] = TouchSensor.new(@nxt, NXTComm::SENSOR_1)
+    @sensors[2] = SoundSensor.new(@nxt, NXTComm::SENSOR_2)
+    @sensors[3] = LightSensor.new(@nxt, NXTComm::SENSOR_3)
+    @sensors[4] = UltrasonicSensor.new(@nxt, NXTComm::SENSOR_4)
+    
     @motor_threads = {}
+    @sensor_threads = {}
   end
   
   def method_missing(method, *args, &block)
@@ -71,6 +83,11 @@ class NXT
       motor($1, block)
     elsif /^motors_([abc]+?)$/ =~ name
       motors($1, block)
+    elsif /^sensor_([1234])$/ =~ name
+			sensor($1, block)
+		elsif /^sensor_(touch|sound|light|ultrasonic)$/ =~ name or
+				/^(touch|sound|light|ultrasonic)_sensor$/
+			# TODO: implement this!
     else
       raise "Unknown method '#{method}'"
     end
@@ -122,11 +139,29 @@ class NXT
     @motor_threads[id] = t
   end
   
+  def sensor(id, proc)
+  	id = id.to_i
+  	
+  	@sensor_threads[id].join if (@sensor_threads[id] and @sensor_threads[id].alive?)
+  	
+  	t = Thread.new(@sensors[id]) do |m|
+  		proc.call(m)
+  	end
+  	
+  	# FIXME: this blocks until we get something back from the sensor... probably 
+  	#        not the smartest way to do this
+  	t.join
+  	
+  	# FIXME: do we need to store the thread? it will always be dead by this point..
+  	@sensor_threads[id] = t
+  end
+  
   # Waits for all running jobs to finish and cleanly closes
   # all connections to the NXT device.
   # You should _always_ call this when done sending commands
   # to the NXT.
   def disconnect
+    @sensor_threads.each {|i,t| t.join}
     @motor_threads.each {|i,t| t.join}
     @nxt.close
   end
