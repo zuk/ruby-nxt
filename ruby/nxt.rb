@@ -130,6 +130,11 @@ class NXT
   def motor(id, proc)
     id = id.intern if id.kind_of? String
     
+    # If a thread for this motor is already running, wait until it's finished.
+    # In other words, don't try to send another command to the motor if it is already
+    # doing something else; wait until it's done and then send.
+    # FIXME: I think this blocks the entire program... is that what we really want?
+    #        I think it is, but need to think about it more...
     @motor_threads[id].join if (@motor_threads[id] and @motor_threads[id].alive?)
     
     t = Thread.new(@motors[id]) do |m|
