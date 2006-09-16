@@ -14,8 +14,16 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-# http://raa.ruby-lang.org/project/ruby-serialport/
-require "serialport"
+begin
+	require "serialport"
+rescue LoadError
+	puts
+	puts "You must have the ruby-serialport library installed!"
+	puts "You can download ruby-serialport from http://rubyforge.org/projects/ruby-serialport/"
+	puts
+	exit 1
+end
+
 require "thread"
 
 class Array
