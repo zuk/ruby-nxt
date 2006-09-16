@@ -39,7 +39,11 @@ module InteractiveTestHelper
 	
 	def meter(value, label = "Level", threshold = nil, max = 1.0, min = 0)
 		width = 40
-		percent = ((value - min) / max.to_f)
+		if value >= max
+			percent = 1.0
+    else
+    	percent = ((value - min) / max.to_f)
+    end
 		bars = "|" * (percent * width)
 		spaces = " " * ((1 - percent) * width)
 		meterbar = bars + spaces

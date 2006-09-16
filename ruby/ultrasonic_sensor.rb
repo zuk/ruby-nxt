@@ -55,22 +55,20 @@ class UltrasonicSensor < Sensor
   	raise "ls_read returned more than one byte!" if resp[:bytes_read] > 1
   	raise "ls_read did not return any data!" if resp[:bytes_read] < 1
  
+ 		# TODO: if the sensor cannot determine the distance, it will return
+ 		#       0xff (255)... this usually means that the object is out of
+ 		#       sensor range, but it can also mean that there is too much
+ 		#       interference or that the object is too close to the sensor.
+ 		#       Maybe we need to handle this differently, via some wrapper
+ 		#       class that handles the special 255 value differently?
  		d = resp[:data][0]
-		
-    if d < 255
-      return d
-    else
-      return -1 # maybe we should return nil instead?
-    end
   end
   alias_method :get_distance_in_cm, :get_distance
   
   # Return the measured distance in inches.
-  def get_distance_in_inches
-    d = get_distance
-    return -1 if d == -1
-   	
+  def get_distance_in_inches   	
     get_distance.to_f * 0.3937008
   end
+
   
 end
