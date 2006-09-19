@@ -89,7 +89,9 @@ class NXT
 				/^(touch|sound|light|ultrasonic)_sensor$/
 			# TODO: implement this!
     else
-      raise "Unknown method '#{method}'"
+      #raise "Unknown method '#{method}'"
+      m = @nxt.method(method)
+      m.call(*args)
     end
   end
   
