@@ -19,6 +19,8 @@ require File.dirname(__FILE__)+'/ultrasonic_comm'
 
 class UltrasonicSensor < Sensor
   
+  INCHES_PER_CM = 0.3937008
+  
   def initialize(nxt, port = NXTComm::SENSOR_4)
     super(nxt, port)
     
@@ -34,12 +36,9 @@ class UltrasonicSensor < Sensor
     @nxt.ls_write(@port, UltrasonicComm.continuous_measurement_command)
   end
   
-  # Return raw data from the ultrasonic sensor (via the I2C controller).
-  def read_data
-  	
-  end
-  
   # Return the measured distance in the default units (the default units being centimeters).
+  # A value of 255 is returned when the sensor cannot get an accurate reading (because
+  # the object is out of range, or there is too much interference, etc.) 
   def get_distance
     @nxt.ls_write(@port, UltrasonicComm.read_measurement_byte(0))
     
@@ -51,24 +50,45 @@ class UltrasonicSensor < Sensor
     end
     
     resp = @nxt.ls_read(@port)
-    # FIXME: probably need a better error message here...
+    # TODO: probably need a better error message here...
   	raise "ls_read returned more than one byte!" if resp[:bytes_read] > 1
   	raise "ls_read did not return any data!" if resp[:bytes_read] < 1
  
- 		# TODO: if the sensor cannot determine the distance, it will return
- 		#       0xff (255)... this usually means that the object is out of
- 		#       sensor range, but it can also mean that there is too much
- 		#       interference or that the object is too close to the sensor.
- 		#       Maybe we need to handle this differently, via some wrapper
- 		#       class that handles the special 255 value differently?
+ 		# If the sensor cannot determine the distance, it will return
+ 		# 0xff (255)... this usually means that the object is out of
+ 		# sensor range, but it can also mean that there is too much
+ 		# interference or that the object is too close to the sensor.
+ 		# I considered returning nil or false under such cases, but
+ 		# this makes numeric comparison (i.e. greather than/less than)
+ 		# more difficult
  		d = resp[:data][0]
   end
   alias_method :get_distance_in_cm, :get_distance
   
   # Return the measured distance in inches.
   def get_distance_in_inches   	
-    get_distance.to_f * 0.3937008
+    get_distance.to_f * INCHES_PER_CM
   end
 
+	# Same as get_distance, but raises an UnmeasurableDistance
+	# exception when the sensor cannot accurately determine
+	# the distance.
+	def get_distance!
+		d = get_distance
+		if d == 255
+			raise UnmeasurableDistance
+		else
+			return d
+		end
+  end
+  alias_method :get_distance_in_cm!, :get_distance!
+  
+  def get_distance_in_inches!
+  	get_distance!.to_f * INCHES_PER_CM
+  end
+  
+  # Exception thrown by get_distance! and related methods when
+  # the sensor cannot determine the distance.
+  class UnmeasurableDistance < Exception; end
   
 end
