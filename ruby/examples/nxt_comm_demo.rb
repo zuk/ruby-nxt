@@ -1,28 +1,28 @@
 #!/usr/local/bin/ruby
 
-require 'nxt_comm'
 require 'yaml'
+require File.dirname(__FILE__)+'/../nxt_comm'
 
 $DEBUG = false
 
 @nxt = NXTComm.new("/dev/tty.NXT-DevB-1")
-puts "Connected!"
-
-puts "Starting program"
-@nxt.start_program("Try-Touch.rtm")
-sleep(3)
-puts "Currently running: " + @nxt.get_current_program_name
-puts "Stopping program"
-@nxt.stop_program
-
-@nxt.play_sound_file("Good Job.rso")
+# puts "Connected!"
+# 
+# puts "Starting program"
+# @nxt.start_program("Try-Touch.rtm")
+# sleep(3)
+# puts "Currently running: " + @nxt.get_current_program_name
+# puts "Stopping program"
+# @nxt.stop_program
+# 
+# @nxt.play_sound_file("Good Job.rso")
 
 @nxt.play_tone(500,500)
 
 @nxt.set_output_state(
   NXTComm::MOTOR_A,
   100,
-  NXTComm::MOTORON,
+  NXTComm::REGULATED,
   NXTComm::REGULATION_MODE_MOTOR_SPEED,
   100,
   NXTComm::MOTOR_RUN_STATE_RUNNING,
