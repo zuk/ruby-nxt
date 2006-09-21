@@ -1,16 +1,46 @@
 = ruby-nxt
 
-==== The ruby-nxt library lets you control the LEGO Mindstorms NXT robotics kit via Bluetooth using the Ruby language.
-
-<em>This library is currently in the early stages of development and is far from complete.</em>
+<b>The ruby-nxt library lets you control the LEGO
+Mindstorms NXT robotics kit via Bluetooth using the Ruby language.</b>
 
 There are two interfaces:
 
-- The NXT class provides a high-level, multi-threaded, object-oriented interface.
-  Currently only motor functionality is implemented (sensors aren't).
+- <b>High-Level</b>: The NXT class provides multi-threaded, object-oriented interface to the
+  motors, sensors, and most other core NXT functions.
   
-- The NXTComm class provides low-level direct access to the NXT Bluetooth
-  protocol.
+- <b>Low-Level</b>: The NXTComm class provides direct access to the NXT Bluetooth
+  bytecode protocol. There is also the UltrasonicComm class which implements
+  the I2C communications needed to interact with the ultrasonic sensor (via NXTComm).
   
-ruby-nxt requires ruby-serialport which you must download and install from:
-http://raa.ruby-lang.org/project/ruby-serialport
+ruby-nxt requires the <tt>ruby-serialport</tt> library which you must manually download and install from:
+http://rubyforge.org/projects/ruby-serialport
+
+
+=== Tests & Examples
+
+Most of the ruby-nxt library is well documented with example code. In particular, see
+NXT if you prefer high-level programming or NXTComm if you need access to low-level
+direct commands.
+
+Additionally, the <tt>examples</tt> directory in the ruby-nxt distribution contains examples of some
+of the library's functionality. <tt>nxt_remote_control.rb</tt> in particular provides
+a basic graphical (Tk) interface for controlling and monitoring the NXT.
+
+The <tt>tests</tt> directory contains automated unit tests for testing the core NXT protocol
+(<tt>nxt_comm_test.rb</tt>) and and the motors (<tt>nxt_comm_test.rb</tt>), as well as an interactive
+test suite (<tt>test_sensor.rb</tt>) for testing the functionality of all of the sensors.
+It is recommended that you run all of these tests before attempting to use the
+ruby-nxt library in order to ensure that your NXT is behaving as expected.
+
+To run the tests, be sure that all three motors and sensors are plugged in to the
+standard ports. The motors should not have any LEGO pieces attached.
+
+
+=== How To Contribute
+
+The ruby-nxt project is hosted on RubyForge under http://rubyforge.org/projects/ruby-nxt.
+If you have code that you would like to contribute, please contact one of the project
+admins via RubyForge so that we can grant you access to the subversion repository.
+
+Read-only access to the repository is available anonymously at
+svn://rubyforge.org/var/svn/ruby-nxt/trunk/ruby
