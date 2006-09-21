@@ -17,9 +17,9 @@
 require 'yaml'
 require 'logger'
 
-require File.dirname(__FILE__)+'/nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/nxt_comm'
 
-Logger::Formatter::Format = "%s, [%s#%d] %5s -- %s:\n%s\n"
+#Logger::Formatter::Format = "%s, [%s#%d] %5s -- %s:\n%s\n"
 
 # Abstract parent class of motor and sensor bricks.
 # Currently provides only very basic common functionality but may
@@ -30,7 +30,7 @@ class Brick
   attr_reader :log
 
   def initialize(nxt, port)
-    logfile = File.expand_path(File.dirname(__FILE__))+"/../log/#{self.class}_#{port}.log"
+    logfile = File.expand_path(File.dirname(File.expand_path(__FILE__)))+"/../log/#{self.class}_#{port}.log"
     @log = Logger.new logfile
     @log.level = Logger::DEBUG
     #puts "Logging to #{logfile}"

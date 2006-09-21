@@ -1,13 +1,13 @@
-require File.dirname(__FILE__)+'/../../lib/sensors/touch_sensor'
-require File.dirname(__FILE__)+'/../../lib/sensors/light_sensor'
-require File.dirname(__FILE__)+'/../../lib/sensors/sound_sensor'
-require File.dirname(__FILE__)+'/../../lib/sensors/ultrasonic_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/../../lib/sensors/touch_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/../../lib/sensors/light_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/../../lib/sensors/sound_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/../../lib/sensors/ultrasonic_sensor'
 
-require File.dirname(__FILE__)+'/interactive_test_helper.rb'
+require File.dirname(File.expand_path(__FILE__))+'/interactive_test_helper.rb'
 
 include InteractiveTestHelper
 
-require File.dirname(__FILE__)+'/../../lib/autodetect_nxt'
+require File.dirname(File.expand_path(__FILE__))+'/../../lib/autodetect_nxt'
 
 info "Connecting to the NXT at #{$DEV}..."
 

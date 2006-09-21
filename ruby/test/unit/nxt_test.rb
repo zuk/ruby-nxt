@@ -1,8 +1,8 @@
 require 'test/unit'
 
-require File.dirname(__FILE__)+'/../../lib/nxt'
+require File.dirname(File.expand_path(__FILE__))+'/../../lib/nxt'
 
-require File.dirname(__FILE__)+'/../../lib/autodetect_nxt'
+require File.dirname(File.expand_path(__FILE__))+'/../../lib/autodetect_nxt'
 
 class NXTTest < Test::Unit::TestCase
 
@@ -38,24 +38,24 @@ class NXTTest < Test::Unit::TestCase
     end
   end
   
-  def test_motors_multiple
-    @nxt.motors_abc do |m|
-      m.reset_tacho
-    end
-  
-    @nxt.motors_abc do |m|
-      m.forward(:degrees => 360, :power => 10)
-    end
-    
-    @nxt.motors_abc do |m|
-      assert_in_delta(360, m.read_state[:rotation_count], 30)
-    end
-  end
-  
-  def test_sensors
-  	@nxt.sensor_1 do |s|
-  		
-  	end
-  end
+#  def test_motors_multiple
+#    @nxt.motors_abc do |m|
+#      m.reset_tacho
+#    end
+#  
+#    @nxt.motors_abc do |m|
+#      m.forward(:degrees => 360, :power => 10)
+#    end
+#    
+#    @nxt.motors_abc do |m|
+#      assert_in_delta(360, m.read_state[:rotation_count], 30)
+#    end
+#  end
+#  
+#  def test_sensors
+#  	@nxt.sensor_1 do |s|
+#  		
+#  	end
+#  end
   
 end

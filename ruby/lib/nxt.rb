@@ -14,15 +14,15 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require File.dirname(__FILE__)+'/autodetect_nxt'
+require File.dirname(File.expand_path(__FILE__))+'/autodetect_nxt'
 
-require File.dirname(__FILE__)+'/nxt_comm'
-require File.dirname(__FILE__)+'/motor'
+require File.dirname(File.expand_path(__FILE__))+'/nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/motor'
 
-require File.dirname(__FILE__)+'/sensors/touch_sensor'
-require File.dirname(__FILE__)+'/sensors/sound_sensor'
-require File.dirname(__FILE__)+'/sensors/light_sensor'
-require File.dirname(__FILE__)+'/sensors/ultrasonic_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/sensors/touch_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/sensors/sound_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/sensors/light_sensor'
+require File.dirname(File.expand_path(__FILE__))+'/sensors/ultrasonic_sensor'
 
 # High-level interface for controlling motors and sensors connected to the NXT.
 # Currently only motors and some other misc functionality is implemented.
@@ -88,10 +88,21 @@ class NXT
     elsif /^sensor_([1234])$/ =~ name
 			sensor($1, block)
 		elsif /^sensor_(touch|sound|light|ultrasonic)$/ =~ name or
-				/^(touch|sound|light|ultrasonic)_sensor$/
-			# TODO: implement this!
+				/^(touch|sound|light|ultrasonic)_sensor$/ =~ name
+			case $1
+				when 'touch'
+					sensor(1, block)
+				when 'sound'
+					sensor(2, block)
+				when 'light'
+					sensor(3, block)
+				when 'ultrasonic'
+					sensor(4, block)
+				else
+					raise "'#{$1}' is not a valid sensor."
+			end
     else
-      #raise "Unknown method '#{method}'"
+    	# if the method is not recognized, we assume it is a low-level NXTComm command
       m = @nxt.method(method)
       m.call(*args)
     end

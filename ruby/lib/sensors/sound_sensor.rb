@@ -16,7 +16,7 @@
 
 require 'yaml'
 
-require File.dirname(__FILE__)+'/sensor'
+require File.dirname(File.expand_path(__FILE__))+'/sensor'
 
 class SoundSensor < Sensor
   

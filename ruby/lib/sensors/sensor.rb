@@ -16,7 +16,7 @@
 
 require 'yaml'
 
-require File.dirname(__FILE__)+'/../brick'
+require File.dirname(File.expand_path(__FILE__))+'/../brick'
 
 # Controls and reads an NXT sensor.
 class Sensor < Brick

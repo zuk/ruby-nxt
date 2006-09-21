@@ -16,7 +16,7 @@
 
 require 'yaml'
 
-require File.dirname(__FILE__)+'/brick'
+require File.dirname(File.expand_path(__FILE__))+'/brick'
 
 
 # Controls an NXT motor.
@@ -106,26 +106,38 @@ class Motor < Brick
   #           double check that this is in fact true)
   # [+:direction+] Direction in which the motor should move. 1 for forward,
   #           -1 for backward. The default is 1 (i.e. forward).
+  # [+:wait_until_complete+] If true, the motor will block further commands
+  # 					until this command is complete. This is true by default when
+  # 					:degrees or :time is specified, false by default otherwise.
+  # 					NOTE: currently this setting is always on and cannot be turned off
+  # 					when :time is specified... this will probably be fixed in the future
+  # [+:brake_on_stop+] If true, the motor will try to hard brake when the
+  # 					command completes (otherwise when the command finishes the
+  # 					motor may continue to coast for a while -- especially at higher
+  # 					power levels). This is true by default when :degrees or :time
+  # 					is specified, false by default otherwise.
   # 
-  # Examples:
+  # 
+  # ====Examples:
+  # 
+  # Rotate backward up to 90 degrees:
   # 
   #   m.run(:degrees => 90, :direction => -1)
   # 
-  # The above will rotate backward up to 90 degrees.
+  # Rotate forward for 8 seconds at 100% power:
   # 
   #   m.run(:time => 8, :power => 100)
   # 
-  # The above will rotate forward for 8 seconds at 100% power.
+  # Forward for 3 seconds up to 180 degrees at 50% power. If the 180 degree 
+  # rotation takes only 1 second to complete, the motor will
+  # sit there and wait out the full 3 seconds anyway:
   # 
   #   m.run(:power => 50, :degrees => 180, :time => 3)
   # 
-  # The above will rotate forward for 3 seconds up to 180 degrees at 50% power.
-  # If the 180 degree rotation takes only 1 second to complete, the motor will
-  # sit there and wait out the full 3 seconds anyway.
+  # Rotate forward indefinitely (until Motor#stop is called).
   # 
   #   m.run
   #   
-  # The above will rotate forward indefinitely (until +m.stop+ is called).
   def run(options)
     debug(options, :run)
   
@@ -140,22 +152,41 @@ class Motor < Brick
     degrees = options[:degrees] || 0
     ratio = options[:ratio] || self.ratio
     direction = options[:direction] || 1 # 1 is forward, -1 is backward
+
+    brake_on_stop = options.has_key?(:time) || options.has_key?(:degrees)
+    wait_until_complete = options.has_key?(:time) || options.has_key?(:degrees)
+    
+    brake_on_stop = options[:brake_on_stop] if options.has_key?(:brake_on_stop)
+
+    wait_until_complete = options[:wait_until_complete] if options.has_key?(:wait_until_complete)
+    # FIXME: wait_until_complete MUST be true if a time period is specified, otherwise we have no way of
+    # 				enforcing the time limit (this is a problem with the way threading is implemented...)
+    wait_until_complete = true if options.has_key?(:time)
     
     power = direction * power
     
-    mode = NXTComm::MOTORON | NXTComm::BRAKE
+    mode = NXTComm::MOTORON
+    mode |= NXTComm::BRAKE if brake_on_stop
     mode |= NXTComm::REGULATED if regulate
+    
+    if regulate
+    	regulation_mode = NXTComm::REGULATION_MODE_MOTOR_SPEED
+    else
+    	regulation_mode = NXTComm::REGULATION_MODE_IDLE
+    end
 
     @log.debug(:run) {"sending run command"}
-    @nxt.set_output_state(@port, power, mode, NXTComm::REGULATION_MODE_IDLE, ratio, NXTComm::MOTOR_RUN_STATE_RUNNING, degrees)
+    @nxt.set_output_state(@port, power, mode, regulation_mode, ratio, NXTComm::MOTOR_RUN_STATE_RUNNING, degrees)
   
     if time.nil?
-      @log.debug(:run) {"sleeping until run_state is idle"}
-      until read_state[:run_state] == NXTComm::MOTOR_RUN_STATE_IDLE
-        sleep(POLL_INTERVAL)
-        @log.debug(:run) {"checking run_state again"}
-      end
-      @log.debug(:run) {"run_state is idle"}
+    	if wait_until_complete
+	      @log.debug(:run) {"sleeping until run_state is idle"}
+	      until read_state[:run_state] == NXTComm::MOTOR_RUN_STATE_IDLE
+	        sleep(POLL_INTERVAL)
+	        @log.debug(:run) {"checking run_state again"}
+	      end
+	      @log.debug(:run) {"run_state is idle"}
+    	end
     else
       @log.debug(:run) {"waiting #{time} seconds until stop"}
       sleep(time)
