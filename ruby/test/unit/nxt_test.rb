@@ -1,8 +1,8 @@
 require 'test/unit'
 
-require File.dirname(__FILE__)+'/../../nxt'
+require File.dirname(__FILE__)+'/../../lib/nxt'
 
-$DEV = '/dev/tty.NXT-DevB-1'
+require File.dirname(__FILE__)+'/../../lib/autodetect_nxt'
 
 class NXTTest < Test::Unit::TestCase
 
@@ -50,6 +50,12 @@ class NXTTest < Test::Unit::TestCase
     @nxt.motors_abc do |m|
       assert_in_delta(360, m.read_state[:rotation_count], 30)
     end
+  end
+  
+  def test_sensors
+  	@nxt.sensor_1 do |s|
+  		
+  	end
   end
   
 end

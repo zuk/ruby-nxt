@@ -3,7 +3,7 @@
 # Plays "Mary Had A Little Lamb"
 # Author: Christopher Continanza <christopher.continanza@villanova.edu>
 
-require File.dirname(__FILE__)+'/../nxt_comm'
+require File.dirname(__FILE__)+'/../lib/nxt_comm'
 
 $DEBUG = true
 

@@ -1,7 +1,7 @@
 require 'test/unit'
-require File.dirname(__FILE__)+'/../../motor'
+require File.dirname(__FILE__)+'/../../lib/motor'
 
-$DEV = '/dev/tty.NXT-DevB-1'
+require File.dirname(__FILE__)+'/../../lib/autodetect_nxt'
 
 class MotorTest < Test::Unit::TestCase
 

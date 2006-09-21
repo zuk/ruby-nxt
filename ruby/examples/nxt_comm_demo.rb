@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby
 
 require 'yaml'
-require File.dirname(__FILE__)+'/../nxt_comm'
+require File.dirname(__FILE__)+'/../lib/nxt_comm'
 
 $DEBUG = false
 
