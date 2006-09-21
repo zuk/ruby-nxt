@@ -110,20 +110,21 @@ class NXTComm
   MOTOR_ALL = 0xFF
   
   # output mode
-  MOTORON   = 0x01
-  BRAKE     = 0x02
-  REGULATED = 0x04
+  COAST     = 0x00 # motor will rotate freely?
+  MOTORON   = 0x01 # enables PWM power according to speed
+  BRAKE     = 0x02 # voltage is not allowed to float between PWM pulses, improves accuracy, uses more power
+  REGULATED = 0x04 # required in conjunction with output regulation mode setting
   
   # output regulation mode
-  REGULATION_MODE_IDLE        = 0x00
-  REGULATION_MODE_MOTOR_SPEED = 0x01
-  REGULATION_MODE_MOTOR_SYNC  = 0x02
+  REGULATION_MODE_IDLE        = 0x00 # disables regulation
+  REGULATION_MODE_MOTOR_SPEED = 0x01 # auto adjust PWM duty cycle if motor is affected by physical load
+  REGULATION_MODE_MOTOR_SYNC  = 0x02 # attempt to keep rotation in sync with another motor that has this set, also involves turn ratio
   
   # output run state
-  MOTOR_RUN_STATE_IDLE        = 0x00
-  MOTOR_RUN_STATE_RAMPUP      = 0x10
-  MOTOR_RUN_STATE_RUNNING     = 0x20
-  MOTOR_RUN_STATE_RAMPDOWN    = 0x40
+  MOTOR_RUN_STATE_IDLE        = 0x00 # disables power to motor
+  MOTOR_RUN_STATE_RAMPUP      = 0x10 # ramping to a new SPEED set-point that is greater than the current SPEED set-point
+  MOTOR_RUN_STATE_RUNNING     = 0x20 # enables power to motor
+  MOTOR_RUN_STATE_RAMPDOWN    = 0x40 # ramping to a new SPEED set-point that is less than the current SPEED set-point
   
   # sensor type
   NO_SENSOR           = 0x00
@@ -339,7 +340,7 @@ class NXTComm
   # * <tt>power</tt> - power set point (-100 - 100)
   # * <tt>mode</tt> - output mode (MOTORON, BRAKE, REGULATED)
   # * <tt>reg_mode</tt> - regulation mode (REGULATION_MODE_IDLE, REGULATION_MODE_MOTOR_SPEED, REGULATION_MODE_MOTOR_SYNC)
-  # * <tt>turn_ratio</tt> - turn ratio (-100 - 100)
+  # * <tt>turn_ratio</tt> - turn ratio (-100 - 100) negative shifts power to left motor, positive to right, 50 = one stops, other moves, 100 = each motor moves in opposite directions
   # * <tt>run_state</tt> - run state (MOTOR_RUN_STATE_IDLE, MOTOR_RUN_STATE_RAMPUP, MOTOR_RUN_STATE_RUNNING, MOTOR_RUN_STATE_RAMPDOWN)
   # * <tt>tacho_limit</tt> - tacho limit (number, 0 - run forever)
   def set_output_state(port,power,mode,reg_mode,turn_ratio,run_state,tacho_limit)
@@ -368,7 +369,7 @@ class NXTComm
   #     :power              => -100 - 100,
   #     :mode               => see: output modes,
   #     :reg_mode           => see: regulation modes,
-  #     :turn_ratio         => -100 - 100,
+  #     :turn_ratio         => -100 - 100 negative shifts power to left motor, positive to right, 50 = one stops, other moves, 100 = each motor moves in opposite directions,
   #     :run_state          => see: run states,
   #     :tacho_limit        => current limit on a movement in progress, if any,
   #     :tacho_count        => internal count, number of counts since last reset of the motor counter,
