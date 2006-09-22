@@ -149,6 +149,7 @@ class Motor < Brick
     
     time = options[:time] || nil
     regulate = options[:regulate] || true
+    regulation_mode = options[:regulation_mode] || "speed"
     degrees = options[:degrees] || 0
     ratio = options[:ratio] || self.ratio
     direction = options[:direction] || 1 # 1 is forward, -1 is backward
@@ -170,7 +171,14 @@ class Motor < Brick
     mode |= NXTComm::REGULATED if regulate
     
     if regulate
-    	regulation_mode = NXTComm::REGULATION_MODE_MOTOR_SPEED
+      case regulation_mode
+	      when "idle"
+	        regulation_mode = NXTComm::REGULATION_MODE_IDLE
+        when "speed"
+    	    regulation_mode = NXTComm::REGULATION_MODE_MOTOR_SPEED
+	      when "sync"
+	        regulation_mode = NXTComm::REGULATION_MODE_MOTOR_SYNC
+      end
     else
     	regulation_mode = NXTComm::REGULATION_MODE_IDLE
     end
