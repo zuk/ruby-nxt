@@ -95,9 +95,9 @@ class Move
       tacho_limit = 0
     end
     
-    @ports.each do |p|
+    if @ports.include?(:a) and @ports.include?(:b) and @ports.include?(:c)
       @nxt.set_output_state(
-        NXTComm.const_get("MOTOR_#{p.to_s.upcase}"),
+        NXTComm::MOTOR_ALL,
         motor_power,
         mode,
         reg_mode,
@@ -105,6 +105,18 @@ class Move
         run_state,
         tacho_limit
       )
+    else
+      @ports.each do |p|
+        @nxt.set_output_state(
+          NXTComm.const_get("MOTOR_#{p.to_s.upcase}"),
+          motor_power,
+          mode,
+          reg_mode,
+          turn_ratio,
+          run_state,
+          tacho_limit
+        )
+      end
     end
     
     unless @duration[:unlimited]
@@ -122,9 +134,9 @@ class Move
   # stop the Move command based on the next_action property
   def stop
     if @next_action == :brake
-      @ports.each do |p|
+      if @ports.include?(:a) and @ports.include?(:b) and @ports.include?(:c)
         @nxt.set_output_state(
-          NXTComm.const_get("MOTOR_#{p.to_s.upcase}"),
+          NXTComm::MOTOR_ALL,
           0,
           NXTComm::MOTORON | NXTComm::BRAKE | NXTComm::REGULATED,
           NXTComm::REGULATION_MODE_MOTOR_SPEED,
@@ -132,11 +144,23 @@ class Move
           NXTComm::MOTOR_RUN_STATE_RUNNING,
           0
         )
+      else
+        @ports.each do |p|
+          @nxt.set_output_state(
+            NXTComm.const_get("MOTOR_#{p.to_s.upcase}"),
+            0,
+            NXTComm::MOTORON | NXTComm::BRAKE | NXTComm::REGULATED,
+            NXTComm::REGULATION_MODE_MOTOR_SPEED,
+            0,
+            NXTComm::MOTOR_RUN_STATE_RUNNING,
+            0
+          )
+        end
       end
     else
-      @ports.each do |p|
+      if @ports.include?(:a) and @ports.include?(:b) and @ports.include?(:c)
         @nxt.set_output_state(
-          NXTComm.const_get("MOTOR_#{p.to_s.upcase}"),
+          NXTComm::MOTOR_ALL,
           0,
           NXTComm::COAST,
           NXTComm::REGULATION_MODE_IDLE,
@@ -144,6 +168,18 @@ class Move
           NXTComm::MOTOR_RUN_STATE_IDLE,
           0
         )
+      else
+        @ports.each do |p|
+          @nxt.set_output_state(
+            NXTComm.const_get("MOTOR_#{p.to_s.upcase}"),
+            0,
+            NXTComm::COAST,
+            NXTComm::REGULATION_MODE_IDLE,
+            0,
+            NXTComm::MOTOR_RUN_STATE_IDLE,
+            0
+          )
+        end
       end
     end
   end

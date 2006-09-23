@@ -8,10 +8,10 @@ $DEV = '/dev/tty.NXT-DevB-1'
 
 command = Move.new(@nxt)
 
-command.ports = :a, :b
+command.ports = :a, :b, :c
 command.direction = :backward
 command.duration = {:seconds => 2}
-command.next_action = :coast
+command.next_action = :brake
 
 command.start
 
