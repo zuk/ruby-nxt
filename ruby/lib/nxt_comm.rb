@@ -25,6 +25,7 @@ rescue LoadError
 end
 
 require "thread"
+require File.dirname(File.expand_path(__FILE__))+'/commands/move'
 
 class Array
   def to_hex_str
@@ -200,7 +201,7 @@ class NXTComm
 
   # Create a new instance of NXTComm.
   # Be careful not to create more than one NXTComm object per serial port dev.
-  # If two NXTComms try to talke to the same dev, there will be trouble. 
+  # If two NXTComms try to talk to the same dev, there will be trouble. 
   def initialize(dev)
   
 		@@mutex.synchronize do
@@ -402,47 +403,6 @@ class NXTComm
       false
     end
   end
-  # Get the state of the output motor port.
-  # * <tt>port</tt> - output port (MOTOR_A, MOTOR_B, MOTOR_C)
-  # Returns a hash with the following info (enumerated values see: set_output_state):
-  #   {
-  #     :port               => see: output ports,
-  #     :power              => -100 - 100,
-  #     :mode               => see: output modes,
-  #     :reg_mode           => see: regulation modes,
-  #     :turn_ratio         => -100 - 100,
-  #     :run_state          => see: run states,
-  #     :tacho_limit        => current limit on a movement in progress, if any,
-  #     :tacho_count        => internal count, number of counts since last reset of the motor counter,
-  #     :block_tacho_count  => current position relative to last programmed movement,
-  #     :rotation_count     => current position relative to last reset of the rotation sensor for this motor
-  #   }
-  def get_output_state(port)
-    cmd = [port]
-    result = send_and_receive @@op_codes["get_output_state"], cmd
-
-    if result
-      result_parts = result.from_hex_str.unpack('C6V4')
-      (7..9).each do |i|
-        result_parts[i] = result_parts[i].as_signed if result_parts[i].kind_of? Bignum
-      end
-    
-      {
-        :port               => result_parts[0],
-        :power              => result_parts[1],
-        :mode               => result_parts[2],
-        :reg_mode           => result_parts[3],
-        :turn_ratio         => result_parts[4],
-        :run_state          => result_parts[5],
-        :tacho_limit        => result_parts[6],
-        :tacho_count        => result_parts[7],
-        :block_tacho_count  => result_parts[8],
-        :rotation_count     => result_parts[9]
-      }
-    else
-      false
-    end
-  end
   
   # Get the current values from an input sensor port.
   # * <tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
@@ -464,8 +424,8 @@ class NXTComm
 
     if result
       result_parts = result.from_hex_str.unpack('C5v4')
-      result_parts[1] = 0x01 ? result_parts[1] = true : result_parts[1] = false
-      result_parts[2] = 0x01 ? result_parts[2] = true : result_parts[2] = false
+      result_parts[1] == 0x01 ? result_parts[1] = true : result_parts[1] = false
+      result_parts[2] == 0x01 ? result_parts[2] = true : result_parts[2] = false
 
 			(7..8).each do |i|
 				# convert to signed word

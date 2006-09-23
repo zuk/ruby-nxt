@@ -37,32 +37,28 @@ class NXTRemoteControl
   def forward
     @text.value = "Moving forward..."
     @nxt.motors_ab do |m|
-      m.reset_tacho
-      m.forward(:power => 100, :degrees => 720)
+      m.forward(:power => 75, :regulate => true, :regulation_mode => "sync")
     end
   end
   
   def backward
     @text.value = "Moving backward..."
     @nxt.motors_ab do |m|
-      m.reset_tacho
-      m.backward(:power => 100, :degrees => 720)
+      m.backward(:power => 75, :regulate => true, :regulation_mode => "sync")
     end
   end
   
   def left
     @text.value = "Turning left"
-    @nxt.motor_a do|m|
-      m.reset_tacho
-      m.forward(:power => 100, :degrees => 360)
+    @nxt.motors_ab do |m|
+      m.forward(:power => 75, :regulate => true, :ratio => -50, :regulation_mode => "sync")
     end
   end
   
   def right
     @text.value = "Turning right"
-    @nxt.motor_b do|m|
-      m.reset_tacho
-      m.forward(:power => 100, :degrees => 360)
+    @nxt.motors_ab do |m|
+      m.forward(:power => 75, :regulate => true, :ratio => 50, :regulation_mode => "sync")
     end
   end
   
