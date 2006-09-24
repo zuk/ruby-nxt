@@ -98,7 +98,7 @@ end
 def do_sound_sensor
   s = Commands::SoundSensor.new(@nxt)
   s.comparison = ">"
-  s.trigger_point = 50
+  s.trigger_point = 30
   
   puts "Sound level: #{s.sound_level}"
   puts "Raw value: #{s.raw_value}"
@@ -112,6 +112,27 @@ def do_sound_sensor
   puts "Be quiet!"
 end
 
-do_touch_sensor
+def do_light_sensor
+  l = Commands::LightSensor.new(@nxt)
+  l.comparison = ">"
+  l.trigger_point = 30
+  
+  puts "Intensity: #{l.intensity}"
+  puts "Raw value: #{l.raw_value}"
+  
+  while l.logic == false
+    sleep(0.25)
+    puts "Point at a light so that intesity is #{l.comparison} #{l.trigger_point}..."
+    puts "Intensity: #{l.intensity}"
+  end
+  
+  puts "Let there be light!"
+  
+  puts "Turning off led..."
+  
+  l.generate_light = false
+end
+
+do_light_sensor
 
 puts "Finished."

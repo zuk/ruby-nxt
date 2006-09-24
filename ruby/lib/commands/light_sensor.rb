@@ -14,20 +14,20 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-# Implements the "Sound Sensor" block in NXT-G
-class Commands::SoundSensor
+# Implements the "Light Sensor" block in NXT-G
+class Commands::LightSensor
 
-  attr_reader :port, :mode
+  attr_reader :port, :generate_light
   attr_accessor :trigger_point, :comparison
   
   def initialize(nxt)
     @nxt      = nxt
     
     # defaults the same as NXT-G
-    @port           = 2
+    @port           = 3
     @trigger_point  = 50
     @comparison     = ">"
-    @mode           = "dba"
+    @generate_light = true
     set_mode
   end
 
@@ -36,8 +36,9 @@ class Commands::SoundSensor
     set_mode
   end
 
-  def mode=(mode)
-    @mode = mode
+  # Determines if the sensor's own LED is on or not (true or false)
+  def generate_light=(logic)
+    @generate_light = logic
     set_mode
   end
 
@@ -45,14 +46,14 @@ class Commands::SoundSensor
   def logic
     case @comparison
       when ">"
-        sound_level >= @trigger_point ? true : false
+        intensity >= @trigger_point ? true : false
       when "<"
-        sound_level <= @trigger_point ? true : false
+        intensity <= @trigger_point ? true : false
     end
   end
   
-  # scaled value read from sensor
-  def sound_level
+  # intensity of light detected 0-100 in %
+  def intensity
     @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_scaled]
   end
   
@@ -63,9 +64,10 @@ class Commands::SoundSensor
   
   # sets up the sensor port
   def set_mode
+    @generate_light ? mode = NXTComm::LIGHT_ACTIVE : mode = NXTComm::LIGHT_INACTIVE
     @nxt.set_input_mode(
       NXTComm.const_get("SENSOR_#{@port}"),
-      NXTComm.const_get("SOUND_#{@mode.upcase}"),
+      mode,
       NXTComm::PCTFULLSCALEMODE
     )
   end
