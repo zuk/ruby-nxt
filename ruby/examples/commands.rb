@@ -7,7 +7,7 @@ $DEV = '/dev/tty.NXT-DevB-1'
 @nxt = NXTComm.new($DEV)
 
 def do_move
-  command = Move.new(@nxt)
+  command = Commands::Move.new(@nxt)
 
   command.ports = :a, :b, :c
   command.direction = :backward
@@ -33,7 +33,7 @@ def do_move
 end
 
 def do_motor
-  a = Motor.new(@nxt)
+  a = Commands::Motor.new(@nxt)
   a.port = :a
   a.duration = {:rotations => 1}
   a.control_power = true
@@ -43,7 +43,7 @@ def do_motor
 end
 
 def do_sound
-  s = Sound.new(@nxt)
+  s = Commands::Sound.new(@nxt)
   s.action = :tone
   s.note = "C"
   s.duration = 0.5
@@ -62,7 +62,7 @@ def do_sound
 end
 
 def do_touch_sensor
-  t = TouchSensor.new(@nxt)
+  t = Commands::TouchSensor.new(@nxt)
   t.port = 1
   t.action = :pressed
   
@@ -85,6 +85,6 @@ def do_touch_sensor
   puts "Released!"
 end
 
-do_touch_sensor
+do_sound
 
 puts "Finished."

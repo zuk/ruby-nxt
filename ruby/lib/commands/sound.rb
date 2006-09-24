@@ -15,7 +15,7 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Implements the "Sound" block in NXT-G
-class Sound
+class Commands::Sound
   
   attr_accessor :action
   attr_accessor :control

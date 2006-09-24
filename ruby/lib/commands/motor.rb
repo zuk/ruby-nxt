@@ -15,7 +15,7 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Implements the "Motor" block in NXT-G
-class Motor
+class Commands::Motor
   
   attr_accessor :port
   attr_accessor :direction

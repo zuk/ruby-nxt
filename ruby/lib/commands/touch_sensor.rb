@@ -15,7 +15,7 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Implements the "TouchSensor" block in NXT-G
-class TouchSensor
+class Commands::TouchSensor
 
   attr_reader :port, :action
   

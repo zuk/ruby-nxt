@@ -15,7 +15,7 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Implements the "Move" block in NXT-G
-class Move
+class Commands::Move
   
   attr_reader   :ports
   attr_accessor :direction
