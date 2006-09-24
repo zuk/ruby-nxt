@@ -43,12 +43,11 @@ class Commands::SoundSensor
 
   # returns true or false based on comparison and trigger point
   def logic
-    state = @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))
     case @comparison
       when ">"
-        state[:value_scaled] > @trigger_point ? true : false
+        sound_level > @trigger_point ? true : false
       when "<"
-        state[:value_scaled] < @trigger_point ? false : true
+        sound_level < @trigger_point ? true : false
     end
   end
   
@@ -72,7 +71,7 @@ class Commands::SoundSensor
     @nxt.set_input_mode(
       NXTComm.const_get("SENSOR_#{@port}"),
       NXTComm.const_get("SOUND_#{@mode.upcase}"),
-      NXTComm::RAWMODE
+      NXTComm::PCTFULLSCALEMODE
     )
     reset
   end

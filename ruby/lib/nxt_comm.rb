@@ -143,14 +143,14 @@ class NXTComm
   NO_OF_SENSOR_TYPES  = 0x0C
   
   # sensor mode
-  RAWMODE             = 0x00
-  BOOLEANMODE         = 0x20
-  TRANSITIONCNTMODE   = 0x40
-  PERIODCOUNTERMODE   = 0x60
-  PCTFULLSCALEMODE    = 0x80
+  RAWMODE             = 0x00 # report scaled value equal to raw value
+  BOOLEANMODE         = 0x20 # report scaled value as 1 true or 0 false, false if raw value > 55% of total range, true if < 45%
+  TRANSITIONCNTMODE   = 0x40 # report scaled value as number of transitions between true and false
+  PERIODCOUNTERMODE   = 0x60 # report scaled value as number of transitions from false to true, then back to false
+  PCTFULLSCALEMODE    = 0x80 # report scaled value as % of full scale reading for configured sensor type
   CELSIUSMODE         = 0xA0
   FAHRENHEITMODE      = 0xC0
-  ANGLESTEPSMODE      = 0xE0
+  ANGLESTEPSMODE      = 0xE0 # report scaled value as count of ticks on RCX-style rotation sensor
   SLOPEMASK           = 0x1F
   MODEMASK            = 0xE0
   

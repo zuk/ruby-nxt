@@ -84,29 +84,34 @@ def do_touch_sensor
   end
 
   puts "Released!"
+
+  t.action = :bumped
   
-  puts "Touch sensor raw_value: #{t.raw_value}"
+  while t.logic == false
+    puts "Now bump the button (push and let go)"
+    sleep(0.5)
+  end
+  
+  puts "Bumped!"
 end
 
 def do_sound_sensor
   s = Commands::SoundSensor.new(@nxt)
-  s.comparison = "<"
+  s.comparison = ">"
+  s.trigger_point = 50
   
   puts "Sound level: #{s.sound_level}"
   puts "Raw value: #{s.raw_value}"
   
   while s.logic == false
-    sleep(0.5)
-    puts "Make some noise so sound level is above 50..."
+    sleep(0.25)
+    puts "Make some noise so sound level is #{s.comparison} #{s.trigger_point}..."
     puts "Sound level: #{s.sound_level}"
-    puts "Raw value: #{s.raw_value}"
   end
   
   puts "Be quiet!"
-  puts "Sound level: #{s.sound_level}"
-  puts "Raw value: #{s.raw_value}"
 end
 
-do_sound_sensor
+do_touch_sensor
 
 puts "Finished."

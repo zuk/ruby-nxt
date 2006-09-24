@@ -47,8 +47,7 @@ class Commands::TouchSensor
       when :released
         state[:value_scaled] > 0 ? false : true
       when :bumped
-        # TODO figure out bumped mode...
-        raise "Not Implemented Yet"
+        state[:value_scaled] > 0 ? true : false
     end
   end
   
@@ -58,17 +57,18 @@ class Commands::TouchSensor
     @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_raw]
   end
   
-  # resets the value_scaled property
+  # resets the value_scaled property, use this to reset the sensor when in :bumped mode
   def reset
     @nxt.reset_input_scaled_value(NXTComm.const_get("SENSOR_#{@port}"))
   end
   
   # sets up the sensor port
   def set_mode
+    @action == :bumped ? mode = NXTComm::PERIODCOUNTERMODE : mode = NXTComm::BOOLEANMODE
     @nxt.set_input_mode(
       NXTComm.const_get("SENSOR_#{@port}"),
       NXTComm::SWITCH,
-      NXTComm::BOOLEANMODE
+      mode
     )
   end
 end
