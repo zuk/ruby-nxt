@@ -66,9 +66,10 @@ def do_touch_sensor
   t.port = 1
   t.action = :pressed
   
-  puts "Touch sensor state: #{t.state}"
+  puts "Touch sensor logic: #{t.logic}"
+  puts "Touch sensor raw_value: #{t.raw_value}"
   
-  while t.state == false
+  while t.logic == false
     puts "Hold down the button..."
     sleep(0.5)
   end
@@ -77,14 +78,35 @@ def do_touch_sensor
 
   t.action = :released
   
-  while t.state == false
+  while t.logic == false
     puts "Let go of the button..."
     sleep(0.5)
   end
 
   puts "Released!"
+  
+  puts "Touch sensor raw_value: #{t.raw_value}"
 end
 
-do_sound
+def do_sound_sensor
+  s = Commands::SoundSensor.new(@nxt)
+  s.comparison = "<"
+  
+  puts "Sound level: #{s.sound_level}"
+  puts "Raw value: #{s.raw_value}"
+  
+  while s.logic == false
+    sleep(0.5)
+    puts "Make some noise so sound level is above 50..."
+    puts "Sound level: #{s.sound_level}"
+    puts "Raw value: #{s.raw_value}"
+  end
+  
+  puts "Be quiet!"
+  puts "Sound level: #{s.sound_level}"
+  puts "Raw value: #{s.raw_value}"
+end
+
+do_sound_sensor
 
 puts "Finished."

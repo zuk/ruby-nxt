@@ -14,17 +14,20 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-# Implements the "Touch Sensor" block in NXT-G
-class Commands::TouchSensor
+# Implements the "Sound Sensor" block in NXT-G
+class Commands::SoundSensor
 
-  attr_reader :port, :action
+  attr_reader :port, :mode
+  attr_accessor :trigger_point, :comparison
   
   def initialize(nxt)
     @nxt      = nxt
     
     # defaults the same as NXT-G
-    @port   = 1
-    @action = :pressed
+    @port           = 2
+    @trigger_point  = 50
+    @comparison     = ">"
+    @mode           = "dba"
     set_mode
   end
 
@@ -33,27 +36,28 @@ class Commands::TouchSensor
     set_mode
   end
 
-  def action=(action)
-    @action = action
+  def mode=(mode)
+    @mode = mode
     set_mode
   end
 
-  # returns true or false based on action type
+  # returns true or false based on comparison and trigger point
   def logic
     state = @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))
-    case @action
-      when :pressed
-        state[:value_scaled] > 0 ? true : false
-      when :released
-        state[:value_scaled] > 0 ? false : true
-      when :bumped
-        # TODO figure out bumped mode...
-        raise "Not Implemented Yet"
+    case @comparison
+      when ">"
+        state[:value_scaled] > @trigger_point ? true : false
+      when "<"
+        state[:value_scaled] < @trigger_point ? false : true
     end
   end
   
+  # scaled value read from sensor
+  def sound_level
+    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_scaled]
+  end
+  
   # returns the raw value of the sensor
-  # TODO this method should probably be shared between all sensor commands
   def raw_value
     @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_raw]
   end
@@ -67,8 +71,9 @@ class Commands::TouchSensor
   def set_mode
     @nxt.set_input_mode(
       NXTComm.const_get("SENSOR_#{@port}"),
-      NXTComm::SWITCH,
-      NXTComm::BOOLEANMODE
+      NXTComm.const_get("SOUND_#{@mode.upcase}"),
+      NXTComm::RAWMODE
     )
+    reset
   end
 end
