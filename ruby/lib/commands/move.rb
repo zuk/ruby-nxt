@@ -17,7 +17,7 @@
 # Implements the "Move" block in NXT-G
 class Move
   
-  attr_reader :ports
+  attr_reader   :ports
   attr_accessor :direction
   attr_accessor :steering
   attr_accessor :power
@@ -45,6 +45,7 @@ class Move
       else raise "Invalid port type #{value.class}"
     end
   end
+  alias_method :port=, :ports=
 
   # execute the Move command based on the properties specified
   def start
@@ -83,15 +84,19 @@ class Move
       turn_ratio = 0
     end
     
-    if @duration[:rotations]
-      tacho_limit = @duration[:rotations] * 360
-    end
+    if @duration.class == Hash
+      if @duration[:rotations]
+        tacho_limit = @duration[:rotations] * 360
+      end
     
-    if @duration[:degrees]
-      tacho_limit = @duration[:degrees]
-    end
+      if @duration[:degrees]
+        tacho_limit = @duration[:degrees]
+      end
     
-    if @duration[:seconds] or @duration[:unlimited]
+      if @duration[:seconds]
+        tacho_limit = 0
+      end
+    else
       tacho_limit = 0
     end
     
@@ -119,7 +124,7 @@ class Move
       end
     end
     
-    unless @duration[:unlimited]
+    unless @duration == :unlimited
       if @duration[:seconds]
         sleep(@duration[:seconds])
       else
