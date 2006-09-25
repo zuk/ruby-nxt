@@ -126,11 +126,13 @@ def do_light_sensor
     puts "Intensity: #{l.intensity}"
   end
   
-  puts "Let there be light!"
+  puts "I see light!"
   
   puts "Turning off led..."
   
   l.generate_light = false
+  
+  puts "Normalized Value: #{l.value_normal}"
 end
 
 do_light_sensor

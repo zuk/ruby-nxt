@@ -71,4 +71,11 @@ class Commands::TouchSensor
       mode
     )
   end
+  
+  # attempt to return the input_value requested
+  def method_missing(cmd)
+    state = {}
+    state = @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[cmd]
+    state
+  end
 end
