@@ -42,7 +42,7 @@ class Commands::RotationSensor
     end
   end
   
-  # resets the value_scaled property, use this to reset the sensor when in :bumped mode
+  # resets the value_scaled property, use this to reset the degrees counter
   def reset
     @nxt.reset_motor_position(NXTComm.const_get("MOTOR_#{@port.to_s.upcase}"))
   end
