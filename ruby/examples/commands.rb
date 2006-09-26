@@ -156,6 +156,25 @@ def do_rotation_sensor
   puts "Degrees: #{r.degrees}"
 end
 
-do_light_sensor
+def do_ultrasonic_sensor
+  us = Commands::UltrasonicSensor.new(@nxt)
+  us.mode = :centimeters
+  puts "Distance: #{us.distance}cm"
+  us.mode = :inches
+  puts "Distance: #{us.distance}in"
+  
+  us.comparison = "<"
+  us.trigger_point = 5
+  
+  while us.logic == false
+    sleep(0.5)
+    puts "Move #{us.comparison} #{us.trigger_point} #{us.mode} from the sensor..."
+    puts "Distance: #{us.distance}in"
+  end
+  
+  puts "Got it!"
+end
+
+do_ultrasonic_sensor
 
 puts "Finished."

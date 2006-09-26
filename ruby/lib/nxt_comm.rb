@@ -500,19 +500,19 @@ class NXTComm
     result
   end
 
-  # Keep the connection alive? Also, returns the current sleep time limit in ms
+  # Keep the connection alive and prevents NXT from going to sleep until sleep time.  Also, returns the current sleep time limit in ms
   def keep_alive
     cmd = []
     result = send_and_receive @@op_codes["keep_alive"], cmd
     result == false ? false : result.from_hex_str.unpack("L")[0]
   end
 
-  # TODO Get the status of an LS port?  Returns the count of available bytes to read.
+  # Get the status of an LS port (like ultrasonic sensor).  Returns the count of available bytes to read.
   # * <tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
   def ls_get_status(port)
     cmd = [port]
     result = send_and_receive @@op_codes["ls_get_status"], cmd
-    result
+    result[0]
   end
   
   # Write data to lowspeed I2C port (for talking to the ultrasonic sensor)
