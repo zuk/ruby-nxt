@@ -54,12 +54,12 @@ class Commands::LightSensor
   
   # intensity of light detected 0-100 in %
   def intensity
-    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_scaled]
+    value_scaled
   end
   
   # returns the raw value of the sensor
   def raw_value
-    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_raw]
+    value_raw
   end
   
   # sets up the sensor port
@@ -74,8 +74,6 @@ class Commands::LightSensor
   
   # attempt to return the input_value requested
   def method_missing(cmd)
-    state = {}
-    state = @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[cmd]
-    state
+    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[cmd]
   end
 end

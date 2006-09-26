@@ -53,12 +53,12 @@ class Commands::SoundSensor
   
   # scaled value read from sensor
   def sound_level
-    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_scaled]
+    value_scaled
   end
   
   # returns the raw value of the sensor
   def raw_value
-    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_raw]
+    value_raw
   end
   
   # sets up the sensor port
@@ -72,8 +72,6 @@ class Commands::SoundSensor
   
   # attempt to return the input_value requested
   def method_missing(cmd)
-    state = {}
-    state = @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[cmd]
-    state
+    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[cmd]
   end
 end

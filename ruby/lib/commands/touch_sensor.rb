@@ -40,21 +40,19 @@ class Commands::TouchSensor
 
   # returns true or false based on action type
   def logic
-    state = @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))
     case @action
       when :pressed
-        state[:value_scaled] > 0 ? true : false
+        value_scaled > 0 ? true : false
       when :released
-        state[:value_scaled] > 0 ? false : true
+        value_scaled > 0 ? false : true
       when :bumped
-        state[:value_scaled] > 0 ? true : false
+        value_scaled > 0 ? true : false
     end
   end
   
   # returns the raw value of the sensor
-  # TODO this method should probably be shared between all sensor commands
   def raw_value
-    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[:value_raw]
+    value_raw
   end
   
   # resets the value_scaled property, use this to reset the sensor when in :bumped mode
@@ -74,8 +72,6 @@ class Commands::TouchSensor
   
   # attempt to return the input_value requested
   def method_missing(cmd)
-    state = {}
-    state = @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[cmd]
-    state
+    @nxt.get_input_values(NXTComm.const_get("SENSOR_#{@port}"))[cmd]
   end
 end

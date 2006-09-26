@@ -142,9 +142,7 @@ class Commands::Motor
   
   # attempt to return the output_state requested
   def method_missing(cmd)
-    state = {}
-    state = @nxt.get_output_state(NXTComm.const_get("MOTOR_#{@port.to_s.upcase}"))[cmd]
-    state
+    @nxt.get_output_state(NXTComm.const_get("MOTOR_#{@port.to_s.upcase}"))[cmd]
   end
   
 end

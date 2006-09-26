@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby -w
 
+# TODO this should really be placed in the interactive tests directory...
+
 require File.dirname(File.expand_path(__FILE__))+'/../lib/nxt_comm'
 
 $DEV = '/dev/tty.NXT-DevB-1'
@@ -133,6 +135,25 @@ def do_light_sensor
   l.generate_light = false
   
   puts "Normalized Value: #{l.value_normal}"
+end
+
+def do_rotation_sensor
+  r = Commands::RotationSensor.new(@nxt)
+  r.comparison = ">"
+  r.trigger_point = 50
+  
+  while r.logic == false
+    sleep(0.5)
+    puts "Rotate motor #{r.port} #{r.comparison} #{r.trigger_point} degrees"
+    puts "Moving: #{r.direction}"
+    puts "Degrees: #{r.degrees}"
+  end
+  
+  puts "Done.  We're at #{r.degrees}.  Now I'll reset the sensor so that degrees will be 0... (unless you kept moving after the reset)"
+  
+  r.reset
+
+  puts "Degrees: #{r.degrees}"
 end
 
 do_light_sensor
