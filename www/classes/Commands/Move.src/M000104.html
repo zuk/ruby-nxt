@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>start (Commands::Move)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/commands/move.rb, line 51</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">start</span>
+    <span class="ruby-ivar">@ports</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">p</span><span class="ruby-operator">|</span>
+      <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">reset_motor_position</span>(<span class="ruby-constant">NXTComm</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-node">&quot;MOTOR_#{p.to_s.upcase}&quot;</span>))
+    <span class="ruby-keyword kw">end</span>
+
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@direction</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">:stop</span>
+      <span class="ruby-identifier">motor_power</span> = <span class="ruby-value">0</span>
+      <span class="ruby-identifier">mode</span>        = <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">COAST</span>
+      <span class="ruby-identifier">run_state</span>   = <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTOR_RUN_STATE_IDLE</span>
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-ivar">@direction</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">:forward</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">motor_power</span> = <span class="ruby-ivar">@power</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">motor_power</span> = <span class="ruby-operator">-</span><span class="ruby-ivar">@power</span>
+      <span class="ruby-identifier">mode</span>        = <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTORON</span> <span class="ruby-operator">|</span> <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">BRAKE</span>
+      <span class="ruby-identifier">run_state</span>   = <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTOR_RUN_STATE_RUNNING</span>
+    <span class="ruby-keyword kw">end</span>
+
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@ports</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">2</span>
+      <span class="ruby-identifier">mode</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">REGULATED</span>
+      <span class="ruby-identifier">reg_mode</span> = <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">REGULATION_MODE_MOTOR_SYNC</span>
+
+      <span class="ruby-keyword kw">case</span> <span class="ruby-ivar">@steering</span>[<span class="ruby-identifier">:direction</span>]
+        <span class="ruby-keyword kw">when</span> <span class="ruby-identifier">:straight</span>
+          <span class="ruby-identifier">turn_ratio</span> = <span class="ruby-value">0</span>
+        <span class="ruby-keyword kw">when</span> <span class="ruby-identifier">:spin_left</span>
+          <span class="ruby-identifier">turn_ratio</span> = <span class="ruby-value">-100</span>
+        <span class="ruby-keyword kw">when</span> <span class="ruby-identifier">:spin_right</span>
+          <span class="ruby-identifier">turn_ratio</span> = <span class="ruby-value">100</span>
+        <span class="ruby-keyword kw">when</span> <span class="ruby-identifier">:left</span>
+          <span class="ruby-ivar">@steering</span>[<span class="ruby-identifier">:power</span>].<span class="ruby-identifier">nil?</span> <span class="ruby-value">? </span><span class="ruby-identifier">turn_ratio</span> = <span class="ruby-value">-50</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">turn_ratio</span> = <span class="ruby-operator">-</span><span class="ruby-ivar">@steering</span>[<span class="ruby-identifier">:power</span>]
+        <span class="ruby-keyword kw">when</span> <span class="ruby-identifier">:right</span>
+          <span class="ruby-ivar">@steering</span>[<span class="ruby-identifier">:power</span>].<span class="ruby-identifier">nil?</span> <span class="ruby-value">? </span><span class="ruby-identifier">turn_ratio</span> = <span class="ruby-value">50</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">turn_ratio</span> = <span class="ruby-ivar">@steering</span>[<span class="ruby-identifier">:power</span>]
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-identifier">reg_mode</span> = <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">REGULATION_MODE_IDLE</span>
+      <span class="ruby-identifier">turn_ratio</span> = <span class="ruby-value">0</span>
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@duration</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">Hash</span>
+      <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@duration</span>[<span class="ruby-identifier">:rotations</span>]
+        <span class="ruby-identifier">tacho_limit</span> = <span class="ruby-ivar">@duration</span>[<span class="ruby-identifier">:rotations</span>] <span class="ruby-operator">*</span> <span class="ruby-value">360</span>
+      <span class="ruby-keyword kw">end</span>
+    
+      <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@duration</span>[<span class="ruby-identifier">:degrees</span>]
+        <span class="ruby-identifier">tacho_limit</span> = <span class="ruby-ivar">@duration</span>[<span class="ruby-identifier">:degrees</span>]
+      <span class="ruby-keyword kw">end</span>
+    
+      <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@duration</span>[<span class="ruby-identifier">:seconds</span>]
+        <span class="ruby-identifier">tacho_limit</span> = <span class="ruby-value">0</span>
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-identifier">tacho_limit</span> = <span class="ruby-value">0</span>
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@ports</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">:a</span>) <span class="ruby-keyword kw">and</span> <span class="ruby-ivar">@ports</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">:b</span>) <span class="ruby-keyword kw">and</span> <span class="ruby-ivar">@ports</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">:c</span>)
+      <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">set_output_state</span>(
+        <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTOR_ALL</span>,
+        <span class="ruby-identifier">motor_power</span>,
+        <span class="ruby-identifier">mode</span>,
+        <span class="ruby-identifier">reg_mode</span>,
+        <span class="ruby-identifier">turn_ratio</span>,
+        <span class="ruby-identifier">run_state</span>,
+        <span class="ruby-identifier">tacho_limit</span>
+      )
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-ivar">@ports</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">p</span><span class="ruby-operator">|</span>
+        <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">set_output_state</span>(
+          <span class="ruby-constant">NXTComm</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-node">&quot;MOTOR_#{p.to_s.upcase}&quot;</span>),
+          <span class="ruby-identifier">motor_power</span>,
+          <span class="ruby-identifier">mode</span>,
+          <span class="ruby-identifier">reg_mode</span>,
+          <span class="ruby-identifier">turn_ratio</span>,
+          <span class="ruby-identifier">run_state</span>,
+          <span class="ruby-identifier">tacho_limit</span>
+        )
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-keyword kw">unless</span> <span class="ruby-ivar">@duration</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">:unlimited</span>
+      <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@duration</span>[<span class="ruby-identifier">:seconds</span>]
+        <span class="ruby-identifier">sleep</span>(<span class="ruby-ivar">@duration</span>[<span class="ruby-identifier">:seconds</span>])
+      <span class="ruby-keyword kw">else</span>
+        <span class="ruby-keyword kw">until</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">run_state</span>[<span class="ruby-ivar">@ports</span>[<span class="ruby-value">0</span>]] <span class="ruby-operator">==</span> <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTOR_RUN_STATE_IDLE</span>
+          <span class="ruby-identifier">sleep</span>(<span class="ruby-value">0</span><span class="ruby-value">.25</span>)
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">stop</span>
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

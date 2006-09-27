@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>get_distance (UltrasonicSensor)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/sensors/ultrasonic_sensor.rb, line 43</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">get_distance</span>
+    <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">ls_write</span>(<span class="ruby-ivar">@port</span>, <span class="ruby-constant">UltrasonicComm</span>.<span class="ruby-identifier">read_measurement_byte</span>(<span class="ruby-value">0</span>))
+    
+    <span class="ruby-comment cmt"># Keep checking until we have 1 byte of data to read</span>
+    <span class="ruby-keyword kw">while</span> <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">ls_get_status</span>(<span class="ruby-ivar">@port</span>)[<span class="ruby-value">0</span>] <span class="ruby-operator">&lt;</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">sleep</span>(<span class="ruby-value">0</span><span class="ruby-value">.1</span>)
+      <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">ls_write</span>(<span class="ruby-ivar">@port</span>, <span class="ruby-constant">UltrasonicComm</span>.<span class="ruby-identifier">read_measurement_byte</span>(<span class="ruby-value">0</span>))
+      <span class="ruby-comment cmt"># TODO: implement timeout so we don't get stuck if the expected data never comes</span>
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-identifier">resp</span> = <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">ls_read</span>(<span class="ruby-ivar">@port</span>)
+    <span class="ruby-comment cmt"># TODO: probably need a better error message here...</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-value str">&quot;ls_read returned more than one byte!&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">resp</span>[<span class="ruby-identifier">:bytes_read</span>] <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-value str">&quot;ls_read did not return any data!&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">resp</span>[<span class="ruby-identifier">:bytes_read</span>] <span class="ruby-operator">&lt;</span> <span class="ruby-value">1</span>
+ 
+                <span class="ruby-comment cmt"># If the sensor cannot determine the distance, it will return</span>
+                <span class="ruby-comment cmt"># 0xff (255)... this usually means that the object is out of</span>
+                <span class="ruby-comment cmt"># sensor range, but it can also mean that there is too much</span>
+                <span class="ruby-comment cmt"># interference or that the object is too close to the sensor.</span>
+                <span class="ruby-comment cmt"># I considered returning nil or false under such cases, but</span>
+                <span class="ruby-comment cmt"># this makes numeric comparison (i.e. greather than/less than)</span>
+                <span class="ruby-comment cmt"># more difficult</span>
+                <span class="ruby-identifier">d</span> = <span class="ruby-identifier">resp</span>[<span class="ruby-identifier">:data</span>][<span class="ruby-value">0</span>]
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

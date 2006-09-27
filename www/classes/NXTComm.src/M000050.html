@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>message_read (NXTComm)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/nxt_comm.rb, line 571</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">message_read</span>(<span class="ruby-identifier">inbox_remote</span>,<span class="ruby-identifier">inbox_local</span> = <span class="ruby-value">1</span>,<span class="ruby-identifier">remove</span> = <span class="ruby-keyword kw">false</span>)
+    <span class="ruby-identifier">cmd</span> = [<span class="ruby-identifier">inbox_remote</span>, <span class="ruby-identifier">inbox_local</span>]
+    <span class="ruby-identifier">remove</span> <span class="ruby-value">? </span><span class="ruby-identifier">cmd</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value">0x01</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">cmd</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value">0x00</span>
+    <span class="ruby-identifier">result</span> = <span class="ruby-identifier">send_and_receive</span> <span class="ruby-ivar">@@op_codes</span>[<span class="ruby-value str">&quot;message_read&quot;</span>], <span class="ruby-identifier">cmd</span>
+    <span class="ruby-identifier">result</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">false</span> <span class="ruby-operator">?</span> <span class="ruby-keyword kw">false</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">result</span>[<span class="ruby-value">2</span><span class="ruby-operator">..</span><span class="ruby-value">-1</span>].<span class="ruby-identifier">from_hex_str</span>.<span class="ruby-identifier">unpack</span>(<span class="ruby-value str">&quot;A*&quot;</span>)[<span class="ruby-value">0</span>]
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

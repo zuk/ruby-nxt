@@ -5,16 +5,16 @@
 
 <html>
 <head>
-  <title>reset_tacho (Motor)</title>
+  <title>backward (Motor)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File motor.rb, line 203</span>
-        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">reset_tacho</span>
-                <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:reset_tacho</span>) { <span class="ruby-value str">&quot;resetting tacho&quot;</span> }
-                <span class="ruby-ivar">@nxt</span>.<span class="ruby-constant">ResetMotorPosition</span>(<span class="ruby-ivar">@port</span>, <span class="ruby-keyword kw">false</span>)
-                <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:reset_tacho</span>) { <span class="ruby-value str">&quot;reset tacho&quot;</span> }
+  <pre><span class="ruby-comment cmt"># File motor.rb, line 73</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">backward</span>(<span class="ruby-identifier">options</span>)
+                <span class="ruby-identifier">debug</span>(<span class="ruby-identifier">options</span>, <span class="ruby-identifier">:backward</span>)
+                <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:direction</span>] = <span class="ruby-value">-1</span>
+                <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">run</span>(<span class="ruby-identifier">options</span>)
         <span class="ruby-keyword kw">end</span></pre>
 </body>
 </html>

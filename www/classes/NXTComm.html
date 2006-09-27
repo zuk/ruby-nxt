@@ -55,8 +55,8 @@
         <tr class="top-aligned-row">
             <td><strong>In:</strong></td>
             <td>
-                <a href="../files/nxt_comm_rb.html">
-                nxt_comm.rb
+                <a href="../files/lib/nxt_comm_rb.html">
+                lib/nxt_comm.rb
                 </a>
         <br />
             </td>
@@ -79,45 +79,67 @@
   <div id="contextContent">
 
     <div id="description">
-      <p>
+      <h1>Description</h1>
+<p>
 Low-level interface for communicating directly with the <a
-href="NXT.html">NXT</a> via a Bluetooth serial port.
+href="NXT.html">NXT</a> via a Bluetooth serial port. Implements direct
+commands outlined in Appendix 2-LEGO MINDSTORMS <a href="NXT.html">NXT</a>
+Direct Commands.pdf
 </p>
 <p>
 Not all functionality is implemented yet!
 </p>
 <p>
-Examples:
+For instructions on creating a bluetooth serial port connection:
+</p>
+<ul>
+<li>Linux: <a
+href="http://www.jstuber.net/lego/nxt-programming/bluetooth-linux.html">www.jstuber.net/lego/nxt-programming/bluetooth-linux.html</a>
+
+</li>
+<li>OSX: <a
+href="http://juju.org/articles/2006/08/01/mindstorms-nxt-bluetooth-on-osx">juju.org/articles/2006/08/01/mindstorms-nxt-bluetooth-on-osx</a>
+
+</li>
+<li>Windows: <a
+href="http://juju.org/articles/2006/08/16/ruby-serialport-nxt-on-windows">juju.org/articles/2006/08/16/ruby-serialport-nxt-on-windows</a>
+
+</li>
+</ul>
+<h1>Examples</h1>
+<p>
+First create a new <a href="NXTComm.html">NXTComm</a> object and pass the
+device.
 </p>
 <pre>
-      NXTComm.exec(&quot;/dev/tty.NXT-DevB-1&quot;) do |cmd|
-        cmd.SetOutputState(
-      NXTComm::MOTOR_B,
-      100,
-      NXTComm::MOTORON | NXTComm::BRAKE | NXTComm::REGULATED,
-      NXTComm::REGULATION_MODE_MOTOR_SPEED,
-      100,
-      NXTComm::MOTOR_RUN_STATE_RUNNING,
-      0
-    )
-  end
+  @nxt = NXTComm.new(&quot;/dev/tty.NXT-DevB-1&quot;)
 </pre>
 <p>
-The above would rotate the motor connected to port B forwards indefinitely
-at 100% power.
+Rotate the motor connected to port B forwards indefinitely at 100% power:
 </p>
 <pre>
-  cmd.PlayTone(1000,500)
+  @nxt.set_output_state(
+    NXTComm::MOTOR_B,
+    100,
+    NXTComm::MOTORON,
+    NXTComm::REGULATION_MODE_MOTOR_SPEED,
+    100,
+    NXTComm::MOTOR_RUN_STATE_RUNNING,
+    0
+  )
 </pre>
 <p>
-The above would play a tone at 1000 Hz (??) for 500 ticks (half a second??)
+Play a tone at 1000 Hz for 500 ms:
 </p>
 <pre>
-  puts &quot;Battery Level: #{cmd.GetBatteryLevel[0]/1000.0} V&quot;
+  @nxt.play_tone(1000,500)
 </pre>
 <p>
-The above would print out the current battery level (obviously).
+Print out the current battery level:
 </p>
+<pre>
+  puts &quot;Battery Level: #{@nxt.get_battery_level/1000.0} V&quot;
+</pre>
 
     </div>
 
@@ -128,14 +150,31 @@ The above would print out the current battery level (obviously).
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000013">connect</a>&nbsp;&nbsp;
-      <a href="#M000016">exec</a>&nbsp;&nbsp;
-      <a href="#M000017">method_missing</a>&nbsp;&nbsp;
-      <a href="#M000020">new</a>&nbsp;&nbsp;
-      <a href="#M000019">recv_reply</a>&nbsp;&nbsp;
-      <a href="#M000018">send_cmd</a>&nbsp;&nbsp;
-      <a href="#M000014">start</a>&nbsp;&nbsp;
-      <a href="#M000015">stop</a>&nbsp;&nbsp;
+      <a href="#M000027">close</a>&nbsp;&nbsp;
+      <a href="#M000028">connected?</a>&nbsp;&nbsp;
+      <a href="#M000043">get_battery_level</a>&nbsp;&nbsp;
+      <a href="#M000049">get_current_program_name</a>&nbsp;&nbsp;
+      <a href="#M000039">get_input_values</a>&nbsp;&nbsp;
+      <a href="#M000038">get_output_state</a>&nbsp;&nbsp;
+      <a href="#M000045">keep_alive</a>&nbsp;&nbsp;
+      <a href="#M000046">ls_get_status</a>&nbsp;&nbsp;
+      <a href="#M000048">ls_read</a>&nbsp;&nbsp;
+      <a href="#M000047">ls_write</a>&nbsp;&nbsp;
+      <a href="#M000050">message_read</a>&nbsp;&nbsp;
+      <a href="#M000041">message_write</a>&nbsp;&nbsp;
+      <a href="#M000026">new</a>&nbsp;&nbsp;
+      <a href="#M000034">play_sound_file</a>&nbsp;&nbsp;
+      <a href="#M000035">play_tone</a>&nbsp;&nbsp;
+      <a href="#M000031">recv_reply</a>&nbsp;&nbsp;
+      <a href="#M000040">reset_input_scaled_value</a>&nbsp;&nbsp;
+      <a href="#M000042">reset_motor_position</a>&nbsp;&nbsp;
+      <a href="#M000029">send_and_receive</a>&nbsp;&nbsp;
+      <a href="#M000030">send_cmd</a>&nbsp;&nbsp;
+      <a href="#M000037">set_input_mode</a>&nbsp;&nbsp;
+      <a href="#M000036">set_output_state</a>&nbsp;&nbsp;
+      <a href="#M000032">start_program</a>&nbsp;&nbsp;
+      <a href="#M000033">stop_program</a>&nbsp;&nbsp;
+      <a href="#M000044">stop_sound_playback</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -203,9 +242,9 @@ motors
           <td class="context-item-value">0xFF</td>
         </tr>
         <tr class="top-aligned-row context-row">
-          <td class="context-item-name">IDLE</td>
+          <td class="context-item-name">COAST</td>
           <td>=</td>
-          <td class="context-item-value">0x01</td>
+          <td class="context-item-value">0x00</td>
           <td width="3em">&nbsp;</td>
           <td class="context-item-desc">
 output mode
@@ -410,121 +449,622 @@ sensor mode
     <div id="methods">
       <h3 class="section-bar">Public Class methods</h3>
 
-      <div id="method-M000013" class="method-detail">
-        <a name="M000013"></a>
+      <div id="method-M000026" class="method-detail">
+        <a name="M000026"></a>
 
         <div class="method-heading">
-          <a href="NXTComm.src/M000013.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000013.html');return false;">
-          <span class="method-name">connect</span><span class="method-args">(dev)</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
-        </div>
-      </div>
-
-      <div id="method-M000016" class="method-detail">
-        <a name="M000016"></a>
-
-        <div class="method-heading">
-          <a href="NXTComm.src/M000016.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000016.html');return false;">
-          <span class="method-name">exec</span><span class="method-args">(dev) {|cmd| ...}</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
-        </div>
-      </div>
-
-      <div id="method-M000020" class="method-detail">
-        <a name="M000020"></a>
-
-        <div class="method-heading">
-          <a href="NXTComm.src/M000020.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000020.html');return false;">
+          <a href="NXTComm.src/M000026.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000026.html');return false;">
           <span class="method-name">new</span><span class="method-args">(dev)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-keep the constructor hidden since we use <a
-href="NXTComm.html#M000013">connect</a> as a factory method
+Create a new instance of <a href="NXTComm.html">NXTComm</a>. Be careful not
+to create more than one <a href="NXTComm.html">NXTComm</a> object per
+serial port dev. If two NXTComms try to talk to the same dev, there will be
+trouble.
 </p>
         </div>
       </div>
 
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000017" class="method-detail">
-        <a name="M000017"></a>
+      <div id="method-M000027" class="method-detail">
+        <a name="M000027"></a>
 
         <div class="method-heading">
-          <a href="NXTComm.src/M000017.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000017.html');return false;">
-          <span class="method-name">method_missing</span><span class="method-args">(name,*arg)</span>
+          <a href="NXTComm.src/M000027.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000027.html');return false;">
+          <span class="method-name">close</span><span class="method-args">()</span>
           </a>
         </div>
       
         <div class="method-description">
+          <p>
+Close the connection
+</p>
         </div>
       </div>
 
-      <div id="method-M000019" class="method-detail">
-        <a name="M000019"></a>
+      <div id="method-M000028" class="method-detail">
+        <a name="M000028"></a>
 
         <div class="method-heading">
-          <a href="NXTComm.src/M000019.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000019.html');return false;">
+          <a href="NXTComm.src/M000028.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000028.html');return false;">
+          <span class="method-name">connected?</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns true if the connection to the <a href="NXT.html">NXT</a> is open;
+false otherwise
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000043" class="method-detail">
+        <a name="M000043"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000043.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000043.html');return false;">
+          <span class="method-name">get_battery_level</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns the battery voltage in millivolts.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000049" class="method-detail">
+        <a name="M000049"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000049.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000049.html');return false;">
+          <span class="method-name">get_current_program_name</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns the name of the program currently running on the <a
+href="NXT.html">NXT</a>. Returns an error If no program is running.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000039" class="method-detail">
+        <a name="M000039"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000039.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000039.html');return false;">
+          <span class="method-name">get_input_values</span><span class="method-args">(port)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Get the current values from an input sensor port.
+</p>
+<ul>
+<li><tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
+
+</li>
+</ul>
+<p>
+Returns a hash with the following info (enumerated values see: <a
+href="NXTComm.html#M000037">set_input_mode</a>):
+</p>
+<pre>
+  {
+    :port             =&gt; see: input ports,
+    :valid            =&gt; boolean, true if new data value should be seen as valid data,
+    :calibrated       =&gt; boolean, true if calibration file found and used for 'Calibrated Value' field below,
+    :type             =&gt; see: sensor types,
+    :mode             =&gt; see: sensor modes,
+    :value_raw        =&gt; raw A/D value (device dependent),
+    :value_normal     =&gt; normalized A/D value (0 - 1023),
+    :value_scaled     =&gt; scaled value (mode dependent),
+    :value_calibrated =&gt; calibrated value, scaled to calibration (CURRENTLY UNUSED)
+  }
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000038" class="method-detail">
+        <a name="M000038"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000038.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000038.html');return false;">
+          <span class="method-name">get_output_state</span><span class="method-args">(port)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Get the state of the output motor port.
+</p>
+<ul>
+<li><tt>port</tt> - output port (MOTOR_A, MOTOR_B, MOTOR_C)
+
+</li>
+</ul>
+<p>
+Returns a hash with the following info (enumerated values see: <a
+href="NXTComm.html#M000036">set_output_state</a>):
+</p>
+<pre>
+  {
+    :port               =&gt; see: output ports,
+    :power              =&gt; -100 - 100,
+    :mode               =&gt; see: output modes,
+    :reg_mode           =&gt; see: regulation modes,
+    :turn_ratio         =&gt; -100 - 100 negative shifts power to left motor, positive to right, 50 = one stops, other moves, 100 = each motor moves in opposite directions,
+    :run_state          =&gt; see: run states,
+    :tacho_limit        =&gt; current limit on a movement in progress, if any,
+    :tacho_count        =&gt; internal count, number of counts since last reset of the motor counter,
+    :block_tacho_count  =&gt; current position relative to last programmed movement,
+    :rotation_count     =&gt; current position relative to last reset of the rotation sensor for this motor
+  }
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000045" class="method-detail">
+        <a name="M000045"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000045.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000045.html');return false;">
+          <span class="method-name">keep_alive</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Keep the connection alive and prevents <a href="NXT.html">NXT</a> from
+going to sleep until sleep time. Also, returns the current sleep time limit
+in ms
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000046" class="method-detail">
+        <a name="M000046"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000046.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000046.html');return false;">
+          <span class="method-name">ls_get_status</span><span class="method-args">(port)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Get the status of an LS port (like ultrasonic sensor). Returns the count of
+available bytes to read.
+</p>
+<ul>
+<li><tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000048" class="method-detail">
+        <a name="M000048"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000048.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000048.html');return false;">
+          <span class="method-name">ls_read</span><span class="method-args">(port)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Read data from from lowspeed I2C port (for receiving data from the
+ultrasonic sensor)
+</p>
+<ul>
+<li><tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
+
+</li>
+</ul>
+<p>
+Returns a hash containing:
+</p>
+<pre>
+  {
+    :bytes_read =&gt; number of bytes read
+    :data       =&gt; Rx data (padded)
+  }
+
+  For LS communication on the NXT, data lengths are limited to 16 bytes per command.
+  Furthermore, this protocol does not support variable-length return packages, so the response
+  will always contain 16 data bytes, with invalid data bytes padded with zeroes.
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000047" class="method-detail">
+        <a name="M000047"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000047.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000047.html');return false;">
+          <span class="method-name">ls_write</span><span class="method-args">(port,i2c_msg)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Write data to lowspeed I2C port (for talking to the ultrasonic sensor)
+</p>
+<ul>
+<li><tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
+
+</li>
+<li><tt>i2c_msg</tt> - the I2C message to send to the lowspeed controller; the
+first byte specifies the transmitted data length, the second byte specifies
+the expected respone data length, and the remaining 16 bytes are the
+transmitted data. See <a href="UltrasonicComm.html">UltrasonicComm</a> for
+an example of an I2C sensor protocol implementation.
+
+<p>
+For LS communication on the <a href="NXT.html">NXT</a>, data lengths are
+limited to 16 bytes per command. Rx data length MUST be specified in the
+write command since reading from the device is done on a master-slave basis
+</p>
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000050" class="method-detail">
+        <a name="M000050"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000050.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000050.html');return false;">
+          <span class="method-name">message_read</span><span class="method-args">(inbox_remote,inbox_local = 1,remove = false)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Read a message from a specific inbox on the <a href="NXT.html">NXT</a>.
+</p>
+<ul>
+<li><tt>inbox_remote</tt> - remote inbox number (1 - 10)
+
+</li>
+<li><tt>inbox_local</tt> - local inbox number (1 - 10) (not sure why you need
+this?)
+
+</li>
+<li><tt>remove</tt> - boolean, true - clears message from remote inbox
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000041" class="method-detail">
+        <a name="M000041"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000041.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000041.html');return false;">
+          <span class="method-name">message_write</span><span class="method-args">(inbox,message)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Write a message to a specific inbox on the <a href="NXT.html">NXT</a>. This
+is used to send a message to a currently running program.
+</p>
+<ul>
+<li><tt>inbox</tt> - inbox number (1 - 10)
+
+</li>
+<li><tt>message</tt> - message data
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000034" class="method-detail">
+        <a name="M000034"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000034.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000034.html');return false;">
+          <span class="method-name">play_sound_file</span><span class="method-args">(name,repeat = false)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Play a sound file stored on the <a href="NXT.html">NXT</a>.
+</p>
+<ul>
+<li><tt>name</tt> - file name of the sound file to play
+
+</li>
+<li><tt>repeat</tt> - Loop? (true or false)
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000035" class="method-detail">
+        <a name="M000035"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000035.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000035.html');return false;">
+          <span class="method-name">play_tone</span><span class="method-args">(freq,dur)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Play a tone.
+</p>
+<ul>
+<li><tt>freq</tt> - frequency for the tone in Hz
+
+</li>
+<li><tt>dur</tt> - duration for the tone in ms
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000031" class="method-detail">
+        <a name="M000031"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000031.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000031.html');return false;">
           <span class="method-name">recv_reply</span><span class="method-args">()</span>
           </a>
         </div>
       
         <div class="method-description">
+          <p>
+Process the reply
+</p>
         </div>
       </div>
 
-      <div id="method-M000018" class="method-detail">
-        <a name="M000018"></a>
+      <div id="method-M000040" class="method-detail">
+        <a name="M000040"></a>
 
         <div class="method-heading">
-          <a href="NXTComm.src/M000018.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000018.html');return false;">
+          <a href="NXTComm.src/M000040.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000040.html');return false;">
+          <span class="method-name">reset_input_scaled_value</span><span class="method-args">(port)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Reset the scaled value on an input sensor port.
+</p>
+<ul>
+<li><tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000042" class="method-detail">
+        <a name="M000042"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000042.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000042.html');return false;">
+          <span class="method-name">reset_motor_position</span><span class="method-args">(port,relative = false)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Reset the position of an output motor port.
+</p>
+<ul>
+<li><tt>port</tt> - output port (MOTOR_A, MOTOR_B, MOTOR_C)
+
+</li>
+<li><tt>relative</tt> - boolean, true - position relative to last movement,
+false - absolute position
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000029" class="method-detail">
+        <a name="M000029"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000029.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000029.html');return false;">
+          <span class="method-name">send_and_receive</span><span class="method-args">(op,cmd)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Send message and return response
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000030" class="method-detail">
+        <a name="M000030"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000030.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000030.html');return false;">
           <span class="method-name">send_cmd</span><span class="method-args">(msg)</span>
           </a>
         </div>
       
         <div class="method-description">
+          <p>
+Send direct command bytes
+</p>
         </div>
       </div>
 
-      <div id="method-M000014" class="method-detail">
-        <a name="M000014"></a>
+      <div id="method-M000037" class="method-detail">
+        <a name="M000037"></a>
 
         <div class="method-heading">
-          <a href="NXTComm.src/M000014.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000014.html');return false;">
-          <span class="method-name">start</span><span class="method-args">()</span>
+          <a href="NXTComm.src/M000037.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000037.html');return false;">
+          <span class="method-name">set_input_mode</span><span class="method-args">(port,type,mode)</span>
           </a>
         </div>
       
         <div class="method-description">
+          <p>
+Set various parameters for an input sensor port.
+</p>
+<ul>
+<li><tt>port</tt> - input port (SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4)
+
+</li>
+<li><tt>type</tt> - sensor type (NO_SENSOR, SWITCH, TEMPERATURE, REFLECTION,
+ANGLE, LIGHT_ACTIVE, LIGHT_INACTIVE, SOUND_DB, SOUND_DBA, CUSTOM, LOWSPEED,
+LOWSPEED_9V, NO_OF_SENSOR_TYPES)
+
+</li>
+<li><tt>mode</tt> - sensor mode (RAWMODE, BOOLEANMODE, TRANSITIONCNTMODE,
+PERIODCOUNTERMODE, PCTFULLSCALEMODE, CELSIUSMODE, FAHRENHEITMODE,
+ANGLESTEPMODE, SLOPEMASK, MODEMASK)
+
+</li>
+</ul>
         </div>
       </div>
 
-      <div id="method-M000015" class="method-detail">
-        <a name="M000015"></a>
+      <div id="method-M000036" class="method-detail">
+        <a name="M000036"></a>
 
         <div class="method-heading">
-          <a href="NXTComm.src/M000015.html" target="Code" class="method-signature"
-            onclick="popupCode('NXTComm.src/M000015.html');return false;">
-          <span class="method-name">stop</span><span class="method-args">()</span>
+          <a href="NXTComm.src/M000036.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000036.html');return false;">
+          <span class="method-name">set_output_state</span><span class="method-args">(port,power,mode,reg_mode,turn_ratio,run_state,tacho_limit)</span>
           </a>
         </div>
       
         <div class="method-description">
+          <p>
+Set various parameters for the output motor port(s).
+</p>
+<ul>
+<li><tt>port</tt> - output port (MOTOR_A, MOTOR_B, MOTOR_C, or MOTOR_ALL)
+
+</li>
+<li><tt>power</tt> - power set point (-100 - 100)
+
+</li>
+<li><tt>mode</tt> - output mode (MOTORON, BRAKE, REGULATED)
+
+</li>
+<li><tt>reg_mode</tt> - regulation mode (REGULATION_MODE_IDLE,
+REGULATION_MODE_MOTOR_SPEED, REGULATION_MODE_MOTOR_SYNC)
+
+</li>
+<li><tt>turn_ratio</tt> - turn ratio (-100 - 100) negative shifts power to left
+motor, positive to right, 50 = one stops, other moves, 100 = each motor
+moves in opposite directions
+
+</li>
+<li><tt>run_state</tt> - run state (MOTOR_RUN_STATE_IDLE,
+MOTOR_RUN_STATE_RAMPUP, MOTOR_RUN_STATE_RUNNING, MOTOR_RUN_STATE_RAMPDOWN)
+
+</li>
+<li><tt>tacho_limit</tt> - tacho limit (number, 0 - run forever)
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000032" class="method-detail">
+        <a name="M000032"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000032.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000032.html');return false;">
+          <span class="method-name">start_program</span><span class="method-args">(name)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Start a program stored on the <a href="NXT.html">NXT</a>.
+</p>
+<ul>
+<li><tt>name</tt> - file name of the program
+
+</li>
+</ul>
+        </div>
+      </div>
+
+      <div id="method-M000033" class="method-detail">
+        <a name="M000033"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000033.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000033.html');return false;">
+          <span class="method-name">stop_program</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Stop any programs currently running on the <a href="NXT.html">NXT</a>.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000044" class="method-detail">
+        <a name="M000044"></a>
+
+        <div class="method-heading">
+          <a href="NXTComm.src/M000044.html" target="Code" class="method-signature"
+            onclick="popupCode('NXTComm.src/M000044.html');return false;">
+          <span class="method-name">stop_sound_playback</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Stop any currently playing sounds.
+</p>
         </div>
       </div>
 

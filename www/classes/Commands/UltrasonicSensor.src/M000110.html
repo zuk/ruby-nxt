@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>distance (Commands::UltrasonicSensor)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/commands/ultrasonic_sensor.rb, line 50</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">distance</span>
+    <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">ls_write</span>(<span class="ruby-constant">NXTComm</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-node">&quot;SENSOR_#{@port}&quot;</span>), [<span class="ruby-value">0x02</span>, <span class="ruby-value">0x01</span>, <span class="ruby-value">0x02</span>, <span class="ruby-value">0x42</span>])
+    
+    <span class="ruby-comment cmt"># Keep checking until we have data to read</span>
+    <span class="ruby-keyword kw">while</span> <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">ls_get_status</span>(<span class="ruby-constant">NXTComm</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-node">&quot;SENSOR_#{@port}&quot;</span>)) <span class="ruby-operator">&lt;</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">sleep</span>(<span class="ruby-value">0</span><span class="ruby-value">.1</span>)
+      <span class="ruby-comment cmt"># TODO: implement timeout so we don't get stuck if the expected data never comes</span>
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-identifier">distance</span> = <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">ls_read</span>(<span class="ruby-constant">NXTComm</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-node">&quot;SENSOR_#{@port}&quot;</span>))[<span class="ruby-identifier">:data</span>][<span class="ruby-value">0</span>]
+                
+                <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@mode</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">:centimeters</span>
+                  <span class="ruby-identifier">distance</span>.<span class="ruby-identifier">inspect</span>
+          <span class="ruby-keyword kw">else</span>
+            (<span class="ruby-identifier">distance</span> <span class="ruby-operator">*</span> <span class="ruby-value">0</span><span class="ruby-value">.3937008</span>).<span class="ruby-identifier">to_i</span>
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

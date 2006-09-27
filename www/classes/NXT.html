@@ -55,8 +55,8 @@
         <tr class="top-aligned-row">
             <td><strong>In:</strong></td>
             <td>
-                <a href="../files/nxt_rb.html">
-                nxt.rb
+                <a href="../files/lib/nxt_rb.html">
+                lib/nxt.rb
                 </a>
         <br />
             </td>
@@ -91,7 +91,7 @@ Examples:
   nxt = NXT.new('/dev/tty.NXT-DevB-1')
 
   nxt.motor_a do |m|
-      m.forward(:degrees =&gt; 180, :power =&gt; 15)
+    m.forward(:degrees =&gt; 180, :power =&gt; 15)
   end
 
   nxt.motors_bc do |m|
@@ -99,15 +99,15 @@ Examples:
   end
 
   nxt.motors_abc do |m|
-      m.reset_tacho
-      m.forward(:time =&gt; 3, :power =&gt; 10)
-      puts &quot;Motor #{m.name} moved #{m.state[:degree_count]} degrees.&quot;
+    m.reset_tacho
+    m.forward(:time =&gt; 3, :power =&gt; 10)
+    puts &quot;Motor #{m.name} moved #{m.read_state[:degree_count]} degrees.&quot;
   end
 
   nxt.disconnect
 </pre>
 <p>
-Be sure to call <a href="NXT.html#M000028">NXT#disconnect</a> when done
+Be sure to call <a href="NXT.html#M000068">NXT#disconnect</a> when done
 sending commands, otherwise there may be trouble if you try to connect or
 send commands again afterwards.
 </p>
@@ -121,11 +121,12 @@ send commands again afterwards.
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000028">disconnect</a>&nbsp;&nbsp;
-      <a href="#M000025">method_missing</a>&nbsp;&nbsp;
-      <a href="#M000027">motor</a>&nbsp;&nbsp;
-      <a href="#M000026">motors</a>&nbsp;&nbsp;
-      <a href="#M000024">new</a>&nbsp;&nbsp;
+      <a href="#M000068">disconnect</a>&nbsp;&nbsp;
+      <a href="#M000064">method_missing</a>&nbsp;&nbsp;
+      <a href="#M000066">motor</a>&nbsp;&nbsp;
+      <a href="#M000065">motors</a>&nbsp;&nbsp;
+      <a href="#M000063">new</a>&nbsp;&nbsp;
+      <a href="#M000067">sensor</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -147,34 +148,52 @@ send commands again afterwards.
     <div id="methods">
       <h3 class="section-bar">Public Class methods</h3>
 
-      <div id="method-M000024" class="method-detail">
-        <a name="M000024"></a>
+      <div id="method-M000063" class="method-detail">
+        <a name="M000063"></a>
 
         <div class="method-heading">
-          <a href="NXT.src/M000024.html" target="Code" class="method-signature"
-            onclick="popupCode('NXT.src/M000024.html');return false;">
+          <a href="NXT.src/M000063.html" target="Code" class="method-signature"
+            onclick="popupCode('NXT.src/M000063.html');return false;">
           <span class="method-name">new</span><span class="method-args">(dev = $DEV)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Initialize the <a href="NXT.html">NXT</a>. Currently only motor
-functionality is implemented. You can specify the path to the serialport
-device (e.g. &#8217;/dev/tty.NXT-DevB-1&#8217;) or omit the argument to use
-the serialport device specified in the global $DEV variable.
+Initialize the <a href="NXT.html">NXT</a>. This creates three <a
+href="Motor.html">Motor</a> instances and one kind of each sensor. It is
+assumed that the sensors are connected to the standard ports as follows:
+</p>
+<ul>
+<li>Port 1: Touch
+
+</li>
+<li>Port 2: Sound
+
+</li>
+<li>Port 3: Light
+
+</li>
+<li>Port 4: Ultrasonic
+
+</li>
+</ul>
+<p>
+You can specify the path to the serialport device (e.g.
+&#8217;/dev/tty.NXT-DevB-1&#8217;) or omit the argument to use the
+serialport device specified in the global $DEV variable.
 </p>
         </div>
       </div>
 
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000028" class="method-detail">
-        <a name="M000028"></a>
+      <div id="method-M000068" class="method-detail">
+        <a name="M000068"></a>
 
         <div class="method-heading">
-          <a href="NXT.src/M000028.html" target="Code" class="method-signature"
-            onclick="popupCode('NXT.src/M000028.html');return false;">
+          <a href="NXT.src/M000068.html" target="Code" class="method-signature"
+            onclick="popupCode('NXT.src/M000068.html');return false;">
           <span class="method-name">disconnect</span><span class="method-args">()</span>
           </a>
         </div>
@@ -188,12 +207,12 @@ when done sending commands to the <a href="NXT.html">NXT</a>.
         </div>
       </div>
 
-      <div id="method-M000025" class="method-detail">
-        <a name="M000025"></a>
+      <div id="method-M000064" class="method-detail">
+        <a name="M000064"></a>
 
         <div class="method-heading">
-          <a href="NXT.src/M000025.html" target="Code" class="method-signature"
-            onclick="popupCode('NXT.src/M000025.html');return false;">
+          <a href="NXT.src/M000064.html" target="Code" class="method-signature"
+            onclick="popupCode('NXT.src/M000064.html');return false;">
           <span class="method-name">method_missing</span><span class="method-args">(method, *args, &amp;block)</span>
           </a>
         </div>
@@ -202,12 +221,12 @@ when done sending commands to the <a href="NXT.html">NXT</a>.
         </div>
       </div>
 
-      <div id="method-M000027" class="method-detail">
-        <a name="M000027"></a>
+      <div id="method-M000066" class="method-detail">
+        <a name="M000066"></a>
 
         <div class="method-heading">
-          <a href="NXT.src/M000027.html" target="Code" class="method-signature"
-            onclick="popupCode('NXT.src/M000027.html');return false;">
+          <a href="NXT.src/M000066.html" target="Code" class="method-signature"
+            onclick="popupCode('NXT.src/M000066.html');return false;">
           <span class="method-name">motor</span><span class="method-args">(id, proc)</span>
           </a>
         </div>
@@ -232,12 +251,12 @@ method instead of calling this directly. For example&#8230;
         </div>
       </div>
 
-      <div id="method-M000026" class="method-detail">
-        <a name="M000026"></a>
+      <div id="method-M000065" class="method-detail">
+        <a name="M000065"></a>
 
         <div class="method-heading">
-          <a href="NXT.src/M000026.html" target="Code" class="method-signature"
-            onclick="popupCode('NXT.src/M000026.html');return false;">
+          <a href="NXT.src/M000065.html" target="Code" class="method-signature"
+            onclick="popupCode('NXT.src/M000065.html');return false;">
           <span class="method-name">motors</span><span class="method-args">(which, proc)</span>
           </a>
         </div>
@@ -260,6 +279,20 @@ while&#8230;
 <p>
 &#8230;would only run it on motors B and C.
 </p>
+        </div>
+      </div>
+
+      <div id="method-M000067" class="method-detail">
+        <a name="M000067"></a>
+
+        <div class="method-heading">
+          <a href="NXT.src/M000067.html" target="Code" class="method-signature"
+            onclick="popupCode('NXT.src/M000067.html');return false;">
+          <span class="method-name">sensor</span><span class="method-args">(id, proc)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
         </div>
       </div>
 

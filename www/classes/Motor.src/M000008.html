@@ -5,15 +5,18 @@
 
 <html>
 <head>
-  <title>disconnect (Motor)</title>
+  <title>new (Motor)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File motor.rb, line 115</span>
-        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">disconnect</span>
-                <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">stop</span>
-                <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">close</span>
+  <pre><span class="ruby-comment cmt"># File motor.rb, line 35</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">port</span>, <span class="ruby-identifier">dev</span> = <span class="ruby-identifier">$DEV</span>)
+                <span class="ruby-keyword kw">super</span>(<span class="ruby-identifier">port</span>, <span class="ruby-identifier">dev</span>)
+                
+                <span class="ruby-ivar">@port</span> = <span class="ruby-identifier">formalize_motor_port_name</span>(<span class="ruby-identifier">port</span>)
+                
+                <span class="ruby-ivar">@ratio</span> = <span class="ruby-value">0</span>
         <span class="ruby-keyword kw">end</span></pre>
 </body>
 </html>

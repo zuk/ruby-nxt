@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>test_motors_multiple (NXTTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File test/nxt_test.rb, line 41</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">test_motors_multiple</span>
+                <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">motors_abc</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">m</span>.<span class="ruby-identifier">reset_tacho</span>
+                <span class="ruby-keyword kw">end</span>
+        
+                <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">motors_abc</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">m</span>.<span class="ruby-identifier">forward</span>(<span class="ruby-identifier">:degrees</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">360</span>, <span class="ruby-identifier">:power</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">10</span>)
+                <span class="ruby-keyword kw">end</span>
+                
+                <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">motors_abc</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">assert_in_delta</span>(<span class="ruby-value">360</span>, <span class="ruby-identifier">m</span>.<span class="ruby-identifier">read_state</span>[<span class="ruby-identifier">:degree_count</span>], <span class="ruby-value">20</span>)
+                <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

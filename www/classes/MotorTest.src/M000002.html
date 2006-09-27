@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>setup (MotorTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File test/motor_test.rb, line 8</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">setup</span>
+                <span class="ruby-ivar">@motors</span> = []
+                <span class="ruby-ivar">@motors</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Motor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value str">'a'</span>)
+                <span class="ruby-ivar">@motors</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Motor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value str">'b'</span>)
+                <span class="ruby-ivar">@motors</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Motor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value str">'c'</span>)
+                
+                <span class="ruby-comment cmt"># make sure that we can talk to each of the motors before we try to run any tests</span>
+<span class="ruby-comment cmt">#               @motors.each do |m|</span>
+<span class="ruby-comment cmt">#                       state = m.read_state</span>
+<span class="ruby-comment cmt">#                       if not state</span>
+<span class="ruby-comment cmt">#                               raise &quot;Cannot run tests because motor #{m.port} is not responding.&quot;</span>
+<span class="ruby-comment cmt">#                       end</span>
+<span class="ruby-comment cmt">#               end</span>
+        <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

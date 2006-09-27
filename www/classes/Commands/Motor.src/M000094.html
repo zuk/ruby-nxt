@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>new (Commands::Motor)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/commands/motor.rb, line 30</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">nxt</span>)
+    <span class="ruby-ivar">@nxt</span>          = <span class="ruby-identifier">nxt</span>
+    
+    <span class="ruby-comment cmt"># defaults the same as NXT-G</span>
+    <span class="ruby-ivar">@port</span>           = <span class="ruby-identifier">:a</span>
+    <span class="ruby-ivar">@direction</span>      = <span class="ruby-identifier">:forward</span>
+    <span class="ruby-ivar">@action</span>         = <span class="ruby-identifier">:constant</span>
+    <span class="ruby-ivar">@power</span>          = <span class="ruby-value">75</span>
+    <span class="ruby-ivar">@control_power</span>  = <span class="ruby-keyword kw">false</span>
+    <span class="ruby-ivar">@duration</span>       = <span class="ruby-identifier">:unlimited</span>
+    <span class="ruby-ivar">@wait</span>           = <span class="ruby-keyword kw">false</span>
+    <span class="ruby-ivar">@next_action</span>    = <span class="ruby-identifier">:brake</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

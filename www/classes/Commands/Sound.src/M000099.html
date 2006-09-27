@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>start (Commands::Sound)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/commands/sound.rb, line 44</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">start</span>
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@action</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">:file</span>
+      <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">play_sound_file</span>(<span class="ruby-ivar">@file</span>,<span class="ruby-ivar">@repeat</span>)
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-ivar">@nxt</span>.<span class="ruby-identifier">play_tone</span>(<span class="ruby-ivar">@note</span>.<span class="ruby-identifier">to_freq</span>,(<span class="ruby-ivar">@duration</span> <span class="ruby-operator">*</span> <span class="ruby-value">1000</span>).<span class="ruby-identifier">to_i</span>)
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-comment cmt"># TODO figure out a logical way to repeat a tone without blocking execution</span>
+    
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@wait</span>
+      <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@action</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">:tone</span>
+        <span class="ruby-identifier">sleep</span>(<span class="ruby-ivar">@duration</span>)
+      <span class="ruby-keyword kw">else</span>
+        <span class="ruby-comment cmt"># TODO don't know how to sleep until a sound file finishes</span>
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

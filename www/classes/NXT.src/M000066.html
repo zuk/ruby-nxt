@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>motor (NXT)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/nxt.rb, line 145</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">motor</span>(<span class="ruby-identifier">id</span>, <span class="ruby-identifier">proc</span>)
+    <span class="ruby-identifier">id</span> = <span class="ruby-identifier">id</span>.<span class="ruby-identifier">intern</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">id</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">String</span>
+    
+    <span class="ruby-comment cmt"># If a thread for this motor is already running, wait until it's finished.</span>
+    <span class="ruby-comment cmt"># In other words, don't try to send another command to the motor if it is already</span>
+    <span class="ruby-comment cmt"># doing something else; wait until it's done and then send.</span>
+    <span class="ruby-comment cmt"># FIXME: I think this blocks the entire program... is that what we really want?</span>
+    <span class="ruby-comment cmt">#        I think it is, but need to think about it more...</span>
+    <span class="ruby-ivar">@motor_threads</span>[<span class="ruby-identifier">id</span>].<span class="ruby-identifier">join</span> <span class="ruby-keyword kw">if</span> (<span class="ruby-ivar">@motor_threads</span>[<span class="ruby-identifier">id</span>] <span class="ruby-keyword kw">and</span> <span class="ruby-ivar">@motor_threads</span>[<span class="ruby-identifier">id</span>].<span class="ruby-identifier">alive?</span>)
+    
+    <span class="ruby-identifier">t</span> = <span class="ruby-constant">Thread</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@motors</span>[<span class="ruby-identifier">id</span>]) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">proc</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">m</span>)
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-ivar">@motor_threads</span>[<span class="ruby-identifier">id</span>] = <span class="ruby-identifier">t</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

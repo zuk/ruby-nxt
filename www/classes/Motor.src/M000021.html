@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>run (Motor)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File motor.rb, line 153</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">run</span>(<span class="ruby-identifier">options</span>)
+                <span class="ruby-identifier">debug</span>(<span class="ruby-identifier">options</span>, <span class="ruby-identifier">:run</span>)
+        
+                <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:power</span>]
+                        <span class="ruby-identifier">power</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:power</span>].<span class="ruby-identifier">to_i</span>.<span class="ruby-identifier">abs</span>
+                <span class="ruby-keyword kw">else</span>
+                        <span class="ruby-identifier">power</span> = <span class="ruby-value">25</span>
+                <span class="ruby-keyword kw">end</span>
+                
+                <span class="ruby-identifier">time</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:time</span>] <span class="ruby-operator">||</span> <span class="ruby-keyword kw">nil</span>
+                <span class="ruby-identifier">regulate</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:regulate</span>] <span class="ruby-operator">||</span> <span class="ruby-keyword kw">true</span>
+                <span class="ruby-identifier">degrees</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:degrees</span>] <span class="ruby-operator">||</span> <span class="ruby-value">0</span>
+                <span class="ruby-identifier">ratio</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:ratio</span>] <span class="ruby-operator">||</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">ratio</span>
+                <span class="ruby-identifier">direction</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:direction</span>] <span class="ruby-operator">||</span> <span class="ruby-value">1</span> <span class="ruby-comment cmt"># 1 is forward, -1 is backward</span>
+                
+                <span class="ruby-identifier">power</span> = <span class="ruby-identifier">direction</span> <span class="ruby-operator">*</span> <span class="ruby-identifier">power</span>
+                
+                <span class="ruby-identifier">mode</span> = <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTORON</span> <span class="ruby-operator">|</span> <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">BRAKE</span>
+                <span class="ruby-identifier">mode</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">REGULATED</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">regulate</span>
+
+                <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:run</span>) {<span class="ruby-value str">&quot;sending run command&quot;</span>}
+                <span class="ruby-ivar">@nxt</span>.<span class="ruby-constant">SetOutputState</span>(<span class="ruby-ivar">@port</span>, <span class="ruby-identifier">power</span>, <span class="ruby-identifier">mode</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">REGULATION_MODE_IDLE</span>, <span class="ruby-identifier">ratio</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTOR_RUN_STATE_RUNNING</span>, <span class="ruby-identifier">degrees</span>)
+  
+          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">time</span>.<span class="ruby-identifier">nil?</span>
+                        <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:run</span>) {<span class="ruby-value str">&quot;sleeping until run_state is idle&quot;</span>}
+                        <span class="ruby-keyword kw">until</span> <span class="ruby-identifier">read_state</span>[<span class="ruby-identifier">:run_state</span>] <span class="ruby-operator">==</span> <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTOR_RUN_STATE_IDLE</span>
+                                <span class="ruby-identifier">sleep</span>(<span class="ruby-constant">POLL_INTERVAL</span>)
+                                <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:run</span>) {<span class="ruby-value str">&quot;checking run_state again&quot;</span>}
+                        <span class="ruby-keyword kw">end</span>
+                        <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:run</span>) {<span class="ruby-value str">&quot;run_state is idle&quot;</span>}
+                <span class="ruby-keyword kw">else</span>
+                        <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:run</span>) {<span class="ruby-node">&quot;waiting #{time} seconds until stop&quot;</span>}
+                  <span class="ruby-identifier">sleep</span>(<span class="ruby-identifier">time</span>)
+                  <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:run</span>) {<span class="ruby-value str">&quot;stopping&quot;</span>}
+                        <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">stop</span>
+                        <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:run</span>) {<span class="ruby-value str">&quot;stopped&quot;</span>}
+                <span class="ruby-keyword kw">end</span>
+        <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

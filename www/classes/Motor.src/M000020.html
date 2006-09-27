@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>read_state (Motor)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File motor.rb, line 92</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">read_state</span>
+                <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:read_state</span>) { <span class="ruby-value str">&quot;getting state&quot;</span>}
+                <span class="ruby-identifier">r</span> = <span class="ruby-ivar">@nxt</span>.<span class="ruby-constant">GetOutputState</span>(<span class="ruby-ivar">@port</span>)
+                <span class="ruby-ivar">@log</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">:read_state</span>) { <span class="ruby-value str">&quot;got state&quot;</span> }
+        
+                <span class="ruby-identifier">state</span> = {
+                        <span class="ruby-identifier">:port</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">0</span>],
+                        <span class="ruby-identifier">:power</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">1</span>],
+                        <span class="ruby-identifier">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">2</span>],
+                        <span class="ruby-identifier">:regulation</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">3</span>],
+                        <span class="ruby-identifier">:ratio</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">4</span>],
+                        <span class="ruby-identifier">:run_state</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">5</span>],
+                        <span class="ruby-identifier">:degree_limit</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">6</span>],
+                        <span class="ruby-identifier">:tacho_count</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">7</span>],
+                        <span class="ruby-identifier">:tacho_count_block</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">8</span>],
+                        <span class="ruby-identifier">:degree_count</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">r</span>[<span class="ruby-value">9</span>]
+                }
+                
+                <span class="ruby-identifier">debug</span>(<span class="ruby-identifier">state</span>, <span class="ruby-identifier">:state</span>)
+                
+                <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">state</span>
+        <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

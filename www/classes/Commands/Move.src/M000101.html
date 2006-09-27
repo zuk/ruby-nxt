@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>new (Commands::Move)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/commands/move.rb, line 27</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">nxt</span>)
+    <span class="ruby-ivar">@nxt</span>          = <span class="ruby-identifier">nxt</span>
+    
+    <span class="ruby-comment cmt"># defaults the same as NXT-G</span>
+    <span class="ruby-ivar">@ports</span>        = [<span class="ruby-identifier">:b</span>, <span class="ruby-identifier">:c</span>]
+    <span class="ruby-ivar">@direction</span>    = <span class="ruby-identifier">:forward</span>
+    <span class="ruby-ivar">@steering</span>     = {<span class="ruby-identifier">:left_motor</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">:b</span>, <span class="ruby-identifier">:right_motor</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">:c</span>, <span class="ruby-identifier">:direction</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">:straight</span>, <span class="ruby-identifier">:power</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">100</span>}
+    <span class="ruby-ivar">@power</span>        = <span class="ruby-value">75</span>
+    <span class="ruby-ivar">@duration</span>     = {<span class="ruby-identifier">:rotations</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>}
+    <span class="ruby-ivar">@next_action</span>  = <span class="ruby-identifier">:brake</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

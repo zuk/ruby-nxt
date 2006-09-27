@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>new (NXT)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/nxt.rb, line 64</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">dev</span> = <span class="ruby-identifier">$DEV</span>)
+    <span class="ruby-ivar">@nxt</span> = <span class="ruby-constant">NXTComm</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">dev</span>)
+    
+    <span class="ruby-ivar">@motors</span> = {}
+    <span class="ruby-ivar">@motors</span>[<span class="ruby-identifier">:a</span>] = <span class="ruby-constant">Motor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nxt</span>, <span class="ruby-identifier">:a</span>)
+    <span class="ruby-ivar">@motors</span>[<span class="ruby-identifier">:b</span>] = <span class="ruby-constant">Motor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nxt</span>, <span class="ruby-identifier">:b</span>)
+    <span class="ruby-ivar">@motors</span>[<span class="ruby-identifier">:c</span>] = <span class="ruby-constant">Motor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nxt</span>, <span class="ruby-identifier">:c</span>)
+    
+    <span class="ruby-ivar">@sensors</span> = {}
+    <span class="ruby-ivar">@sensors</span>[<span class="ruby-value">1</span>] = <span class="ruby-constant">TouchSensor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nxt</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">SENSOR_1</span>)
+    <span class="ruby-ivar">@sensors</span>[<span class="ruby-value">2</span>] = <span class="ruby-constant">SoundSensor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nxt</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">SENSOR_2</span>)
+    <span class="ruby-ivar">@sensors</span>[<span class="ruby-value">3</span>] = <span class="ruby-constant">LightSensor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nxt</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">SENSOR_3</span>)
+    <span class="ruby-ivar">@sensors</span>[<span class="ruby-value">4</span>] = <span class="ruby-constant">UltrasonicSensor</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nxt</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">SENSOR_4</span>)
+    
+    <span class="ruby-ivar">@motor_threads</span> = {}
+    <span class="ruby-ivar">@sensor_threads</span> = {}
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

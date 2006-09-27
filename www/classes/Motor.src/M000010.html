@@ -5,15 +5,16 @@
 
 <html>
 <head>
-  <title>stop (Motor)</title>
+  <title>forward (Motor)</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File motor.rb, line 197</span>
-        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">stop</span>
-                <span class="ruby-identifier">debug</span>(<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">:stop</span>)
-                <span class="ruby-ivar">@nxt</span>.<span class="ruby-constant">SetOutputState</span>(<span class="ruby-ivar">@port</span>, <span class="ruby-value">100</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">BRAKE</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">REGULATION_MODE_MOTOR_SPEED</span>, <span class="ruby-value">100</span>, <span class="ruby-constant">NXTComm</span><span class="ruby-operator">::</span><span class="ruby-constant">MOTOR_RUN_STATE_IDLE</span>, <span class="ruby-value">0</span>)
+  <pre><span class="ruby-comment cmt"># File motor.rb, line 65</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">forward</span>(<span class="ruby-identifier">options</span>)
+                <span class="ruby-identifier">debug</span>(<span class="ruby-identifier">options</span>.<span class="ruby-identifier">to_yaml</span>, <span class="ruby-identifier">:forward</span>)
+                <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:direction</span>] = <span class="ruby-value">1</span>
+                <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">run</span>(<span class="ruby-identifier">options</span>)
         <span class="ruby-keyword kw">end</span></pre>
 </body>
 </html>

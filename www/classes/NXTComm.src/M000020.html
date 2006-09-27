@@ -10,10 +10,27 @@
   <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
 </head>
 <body class="standalone-code">
-  <pre><span class="ruby-comment cmt"># File nxt_comm.rb, line 284</span>
-          <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">dev</span>)
-            <span class="ruby-ivar">@dev</span> = <span class="ruby-identifier">dev</span>
-            <span class="ruby-ivar">@sp</span> = <span class="ruby-keyword kw">nil</span>
-          <span class="ruby-keyword kw">end</span></pre>
+  <pre><span class="ruby-comment cmt"># File nxt_comm.rb, line 190</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">dev</span>)
+    <span class="ruby-ivar">@dev</span> = <span class="ruby-identifier">dev</span>
+    <span class="ruby-ivar">@sp</span> = <span class="ruby-keyword kw">nil</span>
+
+        <span class="ruby-keyword kw">begin</span>
+        <span class="ruby-ivar">@sp</span> = <span class="ruby-constant">SerialPort</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@dev</span>, <span class="ruby-value">57600</span>, <span class="ruby-value">8</span>, <span class="ruby-value">1</span>, <span class="ruby-constant">SerialPort</span><span class="ruby-operator">::</span><span class="ruby-constant">NONE</span>)
+    <span class="ruby-keyword kw">rescue</span> <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">EBUSY</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-node">&quot;Cannot connect to #{@dev}. The serial port is busy or unavailable.&quot;</span>
+    <span class="ruby-keyword kw">end</span>
+    
+    <span class="ruby-ivar">@sp</span>.<span class="ruby-identifier">flow_control</span> = <span class="ruby-constant">SerialPort</span><span class="ruby-operator">::</span><span class="ruby-constant">HARD</span>
+    <span class="ruby-ivar">@sp</span>.<span class="ruby-identifier">read_timeout</span> = <span class="ruby-value">5000</span>
+    
+    <span class="ruby-ivar">@mutex</span> = <span class="ruby-constant">Mutex</span>.<span class="ruby-identifier">new</span>
+    
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@sp</span>.<span class="ruby-identifier">nil?</span>
+      <span class="ruby-identifier">$stderr</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Cannot connect to #{@dev}&quot;</span>
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Connected to: #{@dev}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">$DEBUG</span>
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
 </body>
 </html>

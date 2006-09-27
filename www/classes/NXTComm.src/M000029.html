@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>send_and_receive (NXTComm)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/nxt_comm.rb, line 238</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">send_and_receive</span>(<span class="ruby-identifier">op</span>,<span class="ruby-identifier">cmd</span>)
+    <span class="ruby-identifier">msg</span> = [<span class="ruby-identifier">op</span>] <span class="ruby-operator">+</span> <span class="ruby-identifier">cmd</span> <span class="ruby-operator">+</span> [<span class="ruby-value">0x00</span>]
+    
+    <span class="ruby-identifier">send_cmd</span>(<span class="ruby-identifier">msg</span>)
+    <span class="ruby-identifier">ok</span>,<span class="ruby-identifier">response</span> = <span class="ruby-identifier">recv_reply</span>
+    
+    <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">ok</span> <span class="ruby-keyword kw">and</span> <span class="ruby-identifier">response</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">==</span> <span class="ruby-identifier">op</span>
+      <span class="ruby-identifier">data</span> = <span class="ruby-identifier">response</span>[<span class="ruby-value">3</span><span class="ruby-operator">..</span><span class="ruby-identifier">response</span>.<span class="ruby-identifier">size</span>]
+      <span class="ruby-comment cmt"># TODO ? if data contains a \n character, ruby seems to pass the parts before and after the \n</span>
+      <span class="ruby-comment cmt"># as two different parameters... we need to encode the data into a format that doesn't</span>
+      <span class="ruby-comment cmt"># contain any \n's and then decode it in the receiving method</span>
+      <span class="ruby-identifier">data</span> = <span class="ruby-identifier">data</span>.<span class="ruby-identifier">to_hex_str</span>
+    <span class="ruby-keyword kw">elsif</span> <span class="ruby-operator">!</span><span class="ruby-identifier">ok</span>
+      <span class="ruby-identifier">$stderr</span>.<span class="ruby-identifier">puts</span> <span class="ruby-identifier">response</span>
+      <span class="ruby-identifier">data</span> = <span class="ruby-keyword kw">false</span>
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-identifier">$stderr</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;ERROR: Unexpected response #{response}&quot;</span>
+      <span class="ruby-identifier">data</span> = <span class="ruby-keyword kw">false</span>
+    <span class="ruby-keyword kw">end</span>
+    <span class="ruby-identifier">data</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

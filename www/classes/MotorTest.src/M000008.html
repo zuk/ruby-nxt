@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>test_run_by_seconds (MotorTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File test/motor_test.rb, line 85</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">test_run_by_seconds</span>
+        <span class="ruby-ivar">@motors</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+               <span class="ruby-identifier">m</span>.<span class="ruby-identifier">reset_tacho</span>
+               <span class="ruby-identifier">m</span>.<span class="ruby-identifier">forward</span>(<span class="ruby-identifier">:time</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">3</span>, <span class="ruby-identifier">:power</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">15</span>)
+               <span class="ruby-identifier">state</span> = <span class="ruby-identifier">m</span>.<span class="ruby-identifier">read_state</span>
+               <span class="ruby-identifier">assert_in_delta</span>(<span class="ruby-value">344</span>, <span class="ruby-identifier">state</span>[<span class="ruby-identifier">:degree_count</span>], <span class="ruby-value">50</span>)
+               
+               <span class="ruby-identifier">m</span>.<span class="ruby-identifier">reset_tacho</span>
+               <span class="ruby-identifier">m</span>.<span class="ruby-identifier">backward</span>(<span class="ruby-identifier">:time</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">3</span>, <span class="ruby-identifier">:power</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">15</span>)
+               <span class="ruby-identifier">state</span> = <span class="ruby-identifier">m</span>.<span class="ruby-identifier">read_state</span>
+               <span class="ruby-identifier">assert_in_delta</span>(<span class="ruby-value">-344</span>, <span class="ruby-identifier">state</span>[<span class="ruby-identifier">:degree_count</span>], <span class="ruby-value">50</span>)
+          <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

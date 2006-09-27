@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>sensor (NXT)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/nxt.rb, line 162</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">sensor</span>(<span class="ruby-identifier">id</span>, <span class="ruby-identifier">proc</span>)
+        <span class="ruby-identifier">id</span> = <span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_i</span>
+        
+        <span class="ruby-ivar">@sensor_threads</span>[<span class="ruby-identifier">id</span>].<span class="ruby-identifier">join</span> <span class="ruby-keyword kw">if</span> (<span class="ruby-ivar">@sensor_threads</span>[<span class="ruby-identifier">id</span>] <span class="ruby-keyword kw">and</span> <span class="ruby-ivar">@sensor_threads</span>[<span class="ruby-identifier">id</span>].<span class="ruby-identifier">alive?</span>)
+        
+        <span class="ruby-identifier">t</span> = <span class="ruby-constant">Thread</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@sensors</span>[<span class="ruby-identifier">id</span>]) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+                <span class="ruby-identifier">proc</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">m</span>)
+        <span class="ruby-keyword kw">end</span>
+        
+        <span class="ruby-comment cmt"># FIXME: this blocks until we get something back from the sensor... probably </span>
+        <span class="ruby-comment cmt">#        not the smartest way to do this</span>
+        <span class="ruby-identifier">t</span>.<span class="ruby-identifier">join</span>
+        
+        <span class="ruby-comment cmt"># FIXME: do we need to store the thread? it will always be dead by this point..</span>
+        <span class="ruby-ivar">@sensor_threads</span>[<span class="ruby-identifier">id</span>] = <span class="ruby-identifier">t</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

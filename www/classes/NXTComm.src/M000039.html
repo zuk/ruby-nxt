@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>get_input_values (NXTComm)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/nxt_comm.rb, line 421</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">get_input_values</span>(<span class="ruby-identifier">port</span>)
+    <span class="ruby-identifier">cmd</span> = [<span class="ruby-identifier">port</span>]
+    <span class="ruby-identifier">result</span> = <span class="ruby-identifier">send_and_receive</span> <span class="ruby-ivar">@@op_codes</span>[<span class="ruby-value str">&quot;get_input_values&quot;</span>], <span class="ruby-identifier">cmd</span>
+
+    <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">result</span>
+      <span class="ruby-identifier">result_parts</span> = <span class="ruby-identifier">result</span>.<span class="ruby-identifier">from_hex_str</span>.<span class="ruby-identifier">unpack</span>(<span class="ruby-value str">'C5v4'</span>)
+      <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">==</span> <span class="ruby-value">0x01</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">1</span>] = <span class="ruby-keyword kw">true</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">1</span>] = <span class="ruby-keyword kw">false</span>
+      <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">2</span>] <span class="ruby-operator">==</span> <span class="ruby-value">0x01</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">2</span>] = <span class="ruby-keyword kw">true</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">2</span>] = <span class="ruby-keyword kw">false</span>
+
+                        (<span class="ruby-value">7</span><span class="ruby-operator">..</span><span class="ruby-value">8</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+                                <span class="ruby-comment cmt"># convert to signed word</span>
+                                <span class="ruby-comment cmt"># FIXME: is this right?</span>
+        <span class="ruby-identifier">result_parts</span>[<span class="ruby-identifier">i</span>] = <span class="ruby-value">-1</span><span class="ruby-operator">*</span>(<span class="ruby-identifier">result_parts</span>[<span class="ruby-identifier">i</span>]<span class="ruby-operator">^</span><span class="ruby-value">0xffff</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-identifier">i</span>] <span class="ruby-operator">&gt;</span> <span class="ruby-value">0xfff</span>
+      <span class="ruby-keyword kw">end</span>
+
+      {
+        <span class="ruby-identifier">:port</span>             =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">0</span>],
+        <span class="ruby-identifier">:valid</span>            =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">1</span>],
+        <span class="ruby-identifier">:calibrated</span>       =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">2</span>],
+        <span class="ruby-identifier">:type</span>             =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">3</span>],
+        <span class="ruby-identifier">:mode</span>             =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">4</span>],
+        <span class="ruby-identifier">:value_raw</span>        =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">5</span>],
+        <span class="ruby-identifier">:value_normal</span>     =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">6</span>],
+        <span class="ruby-identifier">:value_scaled</span>     =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">7</span>],
+        <span class="ruby-identifier">:value_calibrated</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">result_parts</span>[<span class="ruby-value">8</span>],
+      }
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-keyword kw">false</span>
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>
