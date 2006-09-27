@@ -9,6 +9,13 @@ if version.nil?
   exit
 end
 
+# TODO
+# cd ruby (into the /ruby code directory in the project)
+# rdoc --op ../www --m README lib LICENSE README
+# cd www
+# scp -r * username@rubyforge.org:/var/www/gforge-projects/ruby-nxt
+# gem build ruby-nxt.gemspec
+
 system "rm ruby/log/*.log"
 system "zip -qr ruby-nxt-#{version}.zip ruby/* -x \\*.svn*"
 system "tar --exclude '*/.*' --exclude 'LICENSE.*' -zc ruby -f ruby-nxt-#{version}.tar.gz"
