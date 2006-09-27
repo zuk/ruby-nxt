@@ -2,8 +2,8 @@ require 'rake'
 
 Gem::Specification.new do |s|
   s.name = %q{ruby-nxt}
-  s.version = "0.9.0"
-  s.date = %q{2006-09-20}
+  s.version = "0.8.0"
+  s.date = %q{2006-09-26}
   s.summary = %q{Ruby interface for controlling the Lego Mindstorms NXT robotics kit via Bluetooth.}
   s.email = %q{matt@roughest.net}
   s.homepage = %q{http://rubyforge.org/projects/ruby-nxt}

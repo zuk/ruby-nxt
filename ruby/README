@@ -3,10 +3,13 @@
 <b>The ruby-nxt library lets you control the LEGO
 Mindstorms NXT robotics kit via Bluetooth using the Ruby language.</b>
 
-There are two interfaces:
+There are three interfaces:
 
 - <b>High-Level</b>: The NXT class provides multi-threaded, object-oriented interface to the
   motors, sensors, and most other core NXT functions.
+
+- <b>NEW High-Level</b>: The Commands module (included with NXTComm) provides a command object-based
+  interface very similar to the Blocks in NXT-G.  (this may replace the NXT class in the future)
   
 - <b>Low-Level</b>: The NXTComm class provides direct access to the NXT Bluetooth
   bytecode protocol. There is also the UltrasonicComm class which implements
