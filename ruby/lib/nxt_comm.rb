@@ -464,9 +464,23 @@ class NXTComm
   def message_write(inbox,message)
     cmd = []
     cmd << inbox - 1
-    cmd << message.size + 1
-    message.each_byte do |b|
-      cmd << b
+    case message.class.to_s
+      when "String"
+        cmd << message.size + 1
+        message.each_byte do |b|
+          cmd << b
+        end
+      when "Fixnum"
+        cmd << 5
+        cmd.concat([(message & 255),(message >> 8),(message >> 16),(message >> 24)])
+      when "TrueClass"
+        cmd << 2
+        cmd << 1
+      when "FalseClass"
+        cmd << 2
+        cmd << 0
+      else
+        raise "Invalid message type"
     end
     result = send_and_receive @@op_codes["message_write"], cmd
     result = true if result == ""
