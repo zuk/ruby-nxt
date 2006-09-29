@@ -471,13 +471,14 @@ class NXTComm
           cmd << b
         end
       when "Fixnum"
-        cmd << 5
-        cmd.concat([(message & 255),(message >> 8),(message >> 16),(message >> 24)])
+        cmd << 5 # msg size + 1
+        #cmd.concat([(message & 255),(message >> 8),(message >> 16),(message >> 24)])
+        [message].pack("V").each_byte{|b| cmd << b}
       when "TrueClass"
-        cmd << 2
+        cmd << 2 # msg size + 1
         cmd << 1
       when "FalseClass"
-        cmd << 2
+        cmd << 2 # msg size + 1
         cmd << 0
       else
         raise "Invalid message type"
