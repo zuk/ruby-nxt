@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby -w
 #
-# The beginings of an nxt server that accepts commands on a socket
-# This will eventually be turned into a configurable class and include in NXTComm
+# example code showing how to make a socket server to communicate with nxt
 #
 # Copyright (C) 2006 Tony Buser <tbuser@gmail.com> - http://juju.org
 #
