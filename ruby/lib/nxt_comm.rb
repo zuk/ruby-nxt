@@ -97,7 +97,7 @@ end
 #   puts "Battery Level: #{@nxt.get_battery_level/1000.0} V"
 #
 class NXTComm
-
+  
   # sensors
   SENSOR_1  = 0x00
   SENSOR_2  = 0x01
