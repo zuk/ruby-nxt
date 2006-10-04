@@ -14,24 +14,26 @@ class NXTComm
 end
 
 class NXTServer
+  private_class_method :new
   @@nxts = {}
 
-  def connect(dev=$DEV)
-    @@nxts[dev] = NXTComm.new(dev) unless @@nxts[dev]
+  def NXTServer.connect(dev=$DEV)
+    # TODO have to fix NXTComm#connected? since it returns true even if NXT turns off
+    if !@@nxts[dev] or !@@nxts[dev].connected?
+      @@nxts[dev] = NXTComm.new(dev)
+    end
     @@nxts[dev]
   end
 end
 
 # TODO is this even possible?
 # keepalive_thread = Thread.new do
-#   server = NXTServer.new
 #   nxt = server.connect
 #   sleep_time = nxt.keep_alive
-#   sleep_time = 4000
 #   puts "Sending keep alive in #{sleep_time / 2000} seconds..."
 #   sleep(sleep_time / 2000)
 # end
 
-DRb.start_service 'druby://localhost:9000', NXTServer.new
+DRb.start_service 'druby://localhost:9000', NXTServer.connect
 puts DRb.uri
 DRb.thread.join

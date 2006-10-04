@@ -4,9 +4,7 @@
 require "drb"
 
 DRb.start_service
-nxt_server = DRbObject.new(nil, 'druby://localhost:9000')
-
-@nxt = nxt_server.connect
+@nxt = DRbObject.new(nil, 'druby://localhost:9000')
 
 puts @nxt.connected?
 @nxt.play_tone(500,500)
