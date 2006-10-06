@@ -59,7 +59,7 @@ module InteractiveTestHelper
 		puts "\e[2A"
 	end
 	
-	def meter(value, label = "Level", threshold = nil, max = 1.0, min = 0)
+	def meter(value, label = "Level", threshold = nil, max = 100, min = 0)
 		width = 40
 		if value.nil?
 			bars = "?" * width

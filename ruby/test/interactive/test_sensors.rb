@@ -12,13 +12,13 @@ require File.dirname(File.expand_path(__FILE__))+'/../../lib/autodetect_nxt'
 info "Connecting to the NXT at #{$DEV}..."
 
 begin
-	nxt = NXTComm.new($DEV)
+  $nxt = NXTComm.new($DEV)
 rescue
-	fail "Could not connect to the NXT!"
-	fail "The error was: #{$!}"
-	notice "Make sure that the NXT is turned on and that your Bluetooth connection is configured."
-	notice "You may need to change the value of the $DEV variable in #{__FILE__} to point to the correct tty device."
-	exit 1
+  fail "Could not connect to the NXT!"
+  fail "The error was: #{$!}"
+  notice "Make sure that the NXT is turned on and that your Bluetooth connection is configured."
+  notice "You may need to change the value of the $DEV variable in #{__FILE__} to point to the correct tty device."
+  exit 1
 end
 
 puts
@@ -34,158 +34,207 @@ prompt "Press Enter on your keyboard when ready..."
 
 ### touch sensor ######
 
-info "Initializing touch sensor..."
-t = TouchSensor.new(nxt)
-notice "Make sure the touch sensor is NOT pressed..."
-sleep(3)
-t.wait_for_event { not t.pressed? }
-pass "Touch sensor not pressed!"
-
-sleep(2)
-notice "Now press the touch sensor..."
-t.wait_for_event { t.pressed? }
-pass "Touch sensor pressed!"
-pass "All touch sensor tests passed!"
-t.off
-puts
+def test_touch_sensor
+	t = Commands::TouchSensor.new($nxt)
+  
+  info "Initializing touch sensor..."
+	t = Commands::TouchSensor.new($nxt)
+	
+  notice "Make sure the touch sensor is NOT pressed..."
+  sleep(2)
+  
+  t.action = :pressed
+  while t.logic
+  	sleep(0.5)
+  end
+  
+  pass "Touch sensor not pressed!"
+  
+  sleep(2)
+  notice "Now press the touch sensor..."
+  
+	t.action = :released
+  while t.logic
+  end
+  
+  pass "Touch sensor pressed!"
+  pass "All touch sensor tests passed!"
+  t.off
+  puts
+end
 
 ### sound sensor ######
 
-sleep(1)
-info "Initializing sound sensor..."
-s = SoundSensor.new(nxt)
+def test_sound_sensor
+  sleep(1)
+  info "Initializing sound sensor..."
+  s = Commands::SoundSensor.new($nxt)
+  
+  sleep(1)
+  notice "Now, be very quiet..."
+  sleep(2)
+  
+  s.comparison = ">"
+  s.trigger_point = 3
+  while s.logic
+    meter(s.sound_level, "Sound Level", 3)
+  end
+  
+  puts
+  pass "OK, sound level was below 3%"
+  
+  sleep(1)
+  notice "Now make some noise!"
+  
+	s.comparison = "<"
+  s.trigger_point = 75
+  while s.logic
+    meter(s.sound_level, "Sound Level", 75)
+  end
 
-sleep(1)
-notice "Now, be very quiet..."
-sleep(2)
-s.wait_for_event(0.025, "<") do
-	meter(s.get_sound_level, "Sound Level", 0.025)
-	s.get_sound_level
+  puts
+  pass "OK, sound level was above 75%"
+  pass "All sound sensor tests passed!"
+  s.off
+  puts
 end
-puts
-pass "OK, sound level was below 2.5%"
-
-sleep(1)
-notice "Now make some noise!"
-s.wait_for_event(0.75) do
-	meter(s.get_sound_level, "Sound Level", 0.75)
-	s.get_sound_level
-end
-puts
-pass "OK, sound level was above 75%"
-pass "All sound sensor tests passed!"
-s.off
-puts
 
 ### light sensor ######
 
-sleep(1)
-info "Initializing light sensor..."
-l = LightSensor.new(nxt)
+def test_light_sensor
+  sleep(1)
+  info "Initializing light sensor..."
+  l = Commands::LightSensor.new($nxt)
+  l.generate_light = true
+  
+  sleep(1)
+  notice "Put the light sensor up to something white or light coloured..."
+  sleep(1)
+  
+  l.comparison = "<"
+  l.trigger_point = 50
+  while l.logic
+    meter(l.intensity, "Colour", 50)
+  end
+  
+  puts
+  pass "OK, colour lightness was above 50%"
+  
+  sleep(1)
+  notice "Now, put the light sensor up to something black or dark coloured..."
+  sleep(2)
+  
+  l.comparison = ">"
+  l.trigger_point = 20
+  while l.logic
+    meter(l.intensity, "Colour", 20)
+  end
+  
+  puts
+  pass "OK, colour lightness was below 20%"
+  
+  sleep(1)
+  info "Switching to ambient light mode..."
+  l.generate_light = false
+  sleep(1)
+  
+  notice "Now put the light sensor under a lamp or some other bright light source..."
+  sleep(2)
+  
+	l.comparison = "<"
+  l.trigger_point = 65
+  while l.logic
+    meter(l.intensity, "Colour", 65)
+  end
 
-sleep(1)
-notice "Put the light sensor up to something white or light coloured..."
-sleep(1)
-l.wait_for_event(0.5) do
-	meter(l.get_light_level, "Colour", 0.5)
-	l.get_light_level
+  puts
+  pass "OK, ambient light level was above 65%"
+  
+  sleep(1)
+  notice "Now cover the light sensor with something to block out the light..."
+  sleep(2)
+  
+  l.comparison = ">"
+  l.trigger_point = 15
+  while l.logic
+    meter(l.intensity, "Colour", 15)
+  end
+  
+  puts
+  pass "OK, ambient light level was below 15%"
+  pass "All light sensor tests passed!"
+  puts
+  l.off
 end
-puts
-pass "OK, colour lightness was above 50%"
-
-sleep(1)
-notice "Now, put the light sensor up to something black or dark coloured..."
-sleep(2)
-l.wait_for_event(0.2, "<") do
-	meter(l.get_light_level, "Colour", 0.2)
-	l.get_light_level
-end
-puts
-pass "OK, colour lightness was below 20%"
-
-sleep(1)
-info "Switching to ambient light mode..."
-l.use_ambient_mode
-sleep(1)
-
-notice "Now put the light sensor under a lamp or some other bright light source..."
-sleep(2)
-l.wait_for_event(0.65) do
-	meter(l.get_light_level, "Light", 0.65)
-	l.get_light_level
-end
-puts
-pass "OK, ambient light level was above 65%"
-
-sleep(1)
-notice "Now cover the light sensor with something to block out the light..."
-sleep(2)
-l.wait_for_event(0.15, "<") do
-	meter(l.get_light_level, "Light", 0.15)
-	l.get_light_level
-end
-puts
-pass "OK, ambient light level was below 15%"
-pass "All light sensor tests passed!"
-puts
-l.off
 
 ### ultrasonic sensor ######
 
-sleep(1)
-info "Initializing ultrasonic sensor..."
-u = UltrasonicSensor.new(nxt)
+def test_ultrasonic_sensor
+  sleep(1)
+  info "Initializing ultrasonic sensor..."
+  us = Commands::UltrasonicSensor.new($nxt)
+  us.mode = :centimeters
+  
+  sleep(1)
+  notice "Point the ultrasonic sensor into the far distance -- at least 2.5 meters (7 feet)..."
+  sleep(2)
+  
+  us.comparison = "<"
+  us.trigger_point = 255
+  
+  while us.logic
+    begin
+    	meter(us.distance!, "Distance (cm)", nil, 150, 0)
+   	rescue Commands::UltrasonicSensor::UnmeasurableDistance
+   		meter(nil, "Distance (cm)", nil, 150, 0)
+   	end
+  end
+  puts
+  pass "OK, the sensor says it can't determine the distance (it can't pick up anything over 2 meters away or anything very very close)."
+  
+  sleep(1)
+  notice "Now point the ultrasonic sensor at something less than 8 cm (3 inches) away..."
+  sleep(1)
+  
+  us.comparison = ">"
+  us.trigger_point = 8
+	while us.logic
+    begin
+    	meter(us.distance!, "Distance (cm)", 8, 150, 0)
+   	rescue Commands::UltrasonicSensor::UnmeasurableDistance
+   		meter(nil, "Distance (cm)", 8, 150, 0)
+   	end
+  end
 
-sleep(1)
-notice "Point the ultrasonic sensor into the far distance -- at least 2.5 meters (7 feet)..."
-sleep(2)
-u.wait_for_event do
-	begin
-		d = u.get_distance_in_cm!
-		meter(d, "Distance (cm)", nil, 150, 0)
-	rescue UltrasonicSensor::UnmeasurableDistance
-		meter(nil, "Distance (cm)", nil, 150, 0)
-		true
-	end
+  puts
+  pass "OK, the sensor detected an object 8 cm or less away."
+  
+  sleep(1)
+  notice "Point the ultrasonic sensor at a wall or some other solid object 1 meter (3 feet) or further away..."
+  sleep(1)
+  
+	us.comparison = "<"
+  us.trigger_point = 100
+	while us.logic
+    begin
+    	meter(us.distance!, "Distance (cm)", 100, 150, 0)
+   	rescue Commands::UltrasonicSensor::UnmeasurableDistance
+   		meter(nil, "Distance (cm)", 100, 150, 0)
+   	end
+  end
+
+  puts
+  pass "OK, the sensor detected an object over 1 meter away."
+  pass "All ultrasonic sensor tests passed!"
+
+  puts
 end
-puts
-pass "OK, the sensor says it can't determine the distance (it can't pick up anything over 2 meters away or anything very very close)."
+  
+test_touch_sensor
+test_sound_sensor
+test_light_sensor
+test_ultrasonic_sensor
 
-sleep(1)
-notice "Now point the ultrasonic sensor at something less than 8 cm (3 inches) away..."
-sleep(1)
-u.wait_for_event(8, "<=") do
-	begin
-		d = u.get_distance_in_cm!
-		meter(d, "Distance (cm)", 8, 150, 0)
-		d
-	rescue UltrasonicSensor::UnmeasurableDistance
-		9999
-	end
-end
-puts
-pass "OK, the sensor detected an object 8 cm or less away."
-
-sleep(1)
-notice "Point the ultrasonic sensor at a wall or some other solid object 1 meter (3 feet) or further away..."
-sleep(1)
-u.wait_for_event(100, ">=") do
-	begin
-		d = u.get_distance_in_cm!
-		meter(d, "Distance (cm)", 100, 150, 0)
-		d
-	rescue UltrasonicSensor::UnmeasurableDistance
-		meter(nil, "Distance (cm)", 100, 150, 0)
-		0
-	end
-end
-puts
-pass "OK, the sensor detected an object over 1 meter away."
-pass "All ultrasonic sensor tests passed!"
-
-u.off
-
-puts
 pass "CONGRATULATIONS! ruby-nxt was successfully able to communicate will all of your NXT's sensors."
 
-nxt.close
+$nxt.close
