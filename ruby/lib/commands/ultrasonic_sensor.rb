@@ -17,6 +17,9 @@
 # Implements the "Ultrasonic Sensor" block in NXT-G
 class Commands::UltrasonicSensor
 
+	# Exception thrown by distance! when the sensor cannot determine the distance.
+  class UnmeasurableDistance < Exception; end
+
   attr_reader :port
   attr_accessor :mode, :trigger_point, :comparison
   
@@ -38,12 +41,7 @@ class Commands::UltrasonicSensor
 
   # returns true or false based on comparison and trigger point
   def logic
-    case @comparison
-      when ">"
-        distance >= @trigger_point ? true : false
-      when "<"
-        distance <= @trigger_point ? true : false
-    end
+  	eval "distance #{@comparison} @trigger_point"
   end
   
   # returns distance in requested mode (:inches or :centimeters)
@@ -59,10 +57,19 @@ class Commands::UltrasonicSensor
     distance = @nxt.ls_read(NXTComm.const_get("SENSOR_#{@port}"))[:data][0]
  		
  		if @mode == :centimeters
- 		  distance.inspect
+ 		  distance.to_i
 	  else
 	    (distance * 0.3937008).to_i
     end
+  end
+  
+  # returns the distance in requested mode; raises an UnmeasurableDistance exception
+  # when the distance cannot be measured (i.e. when the distance == 255, which is
+  # the code the sensor returns when it cannot get a distance reading)
+  def distance!
+  	d = distance
+  	raise UnmeasurableDistance if d == 255
+  	return d
   end
   
   # sets up the sensor port
