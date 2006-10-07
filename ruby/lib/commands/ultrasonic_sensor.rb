@@ -15,6 +15,7 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/../ultrasonic_comm'
 require File.dirname(File.expand_path(__FILE__))+'/sensor'
 
 # Implements the "Ultrasonic Sensor" block in NXT-G
@@ -41,7 +42,7 @@ class Commands::UltrasonicSensor
   
   # returns distance in requested mode (:inches or :centimeters)
   def distance
-    @nxt.ls_write(NXTComm.const_get("SENSOR_#{@port}"), [0x02, 0x01, 0x02, 0x42])
+    @nxt.ls_write(NXTComm.const_get("SENSOR_#{@port}"), UltrasonicComm.read_measurement_byte(0))
     
     # Keep checking until we have data to read
     while @nxt.ls_get_status(NXTComm.const_get("SENSOR_#{@port}")) < 1
@@ -78,6 +79,6 @@ class Commands::UltrasonicSensor
     # clear buffer
     @nxt.ls_read(NXTComm.const_get("SENSOR_#{@port}"))
     # set sensor to continuously send pings
-    @nxt.ls_write(NXTComm.const_get("SENSOR_#{@port}"), [0x03, 0x00, 0x02, 0x41, 0x02])
+    @nxt.ls_write(NXTComm.const_get("SENSOR_#{@port}"), UltrasonicComm.continuous_measurement_command)
   end
 end
