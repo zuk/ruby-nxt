@@ -202,7 +202,7 @@ class NXTComm
   # Create a new instance of NXTComm.
   # Be careful not to create more than one NXTComm object per serial port dev.
   # If two NXTComms try to talk to the same dev, there will be trouble. 
-  def initialize(dev)
+  def initialize(dev = $DEV)
   
 		@@mutex.synchronize do
 	    begin
