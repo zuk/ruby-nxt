@@ -14,6 +14,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+
 # Implements the "Ultrasonic Sensor" block in NXT-G
 class Commands::UltrasonicSensor
 
@@ -37,6 +39,11 @@ class Commands::UltrasonicSensor
   def port=(port)
     @port = port
     set_mode
+  end
+  
+  def comparison=(comparison)
+  	raise ArgumentError, "'#{comparison}' is not a valid comparison operator." unless comparison =~ /^([<>=]=?|!=)$/
+  	@comparison = comparison
   end
 
   # returns true or false based on comparison and trigger point
