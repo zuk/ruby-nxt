@@ -15,13 +15,16 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/sensor'
 
 # Implements the "Ultrasonic Sensor" block in NXT-G
 class Commands::UltrasonicSensor
-
-	# Exception thrown by distance! when the sensor cannot determine the distance.
+  
+  include Commands::Sensor
+  
+  # Exception thrown by distance! when the sensor cannot determine the distance.
   class UnmeasurableDistance < Exception; end
-
+  
   attr_reader :port
   attr_accessor :mode, :trigger_point, :comparison
   
@@ -35,21 +38,6 @@ class Commands::UltrasonicSensor
     @mode           = :inches
     set_mode
   end
-
-  def port=(port)
-    @port = port
-    set_mode
-  end
-  
-  def comparison=(comparison)
-  	raise ArgumentError, "'#{comparison}' is not a valid comparison operator." unless comparison =~ /^([<>=]=?|!=)$/
-  	@comparison = comparison
-  end
-
-  # returns true or false based on comparison and trigger point
-  def logic
-  	eval "distance #{@comparison} @trigger_point"
-  end
   
   # returns distance in requested mode (:inches or :centimeters)
   def distance
@@ -62,21 +50,22 @@ class Commands::UltrasonicSensor
     end
     
     distance = @nxt.ls_read(NXTComm.const_get("SENSOR_#{@port}"))[:data][0]
- 		
- 		if @mode == :centimeters
- 		  distance.to_i
-	  else
-	    (distance * 0.3937008).to_i
+    
+    if @mode == :centimeters
+      distance.to_i
+    else
+     (distance * 0.3937008).to_i
     end
   end
+  alias value_scaled distance
   
   # returns the distance in requested mode; raises an UnmeasurableDistance exception
   # when the distance cannot be measured (i.e. when the distance == 255, which is
   # the code the sensor returns when it cannot get a distance reading)
   def distance!
-  	d = distance
-  	raise UnmeasurableDistance if d == 255
-  	return d
+    d = distance
+    raise UnmeasurableDistance if d == 255
+    return d
   end
   
   # sets up the sensor port

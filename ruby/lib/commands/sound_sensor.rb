@@ -14,9 +14,14 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/sensor'
+
 # Implements the "Sound Sensor" block in NXT-G
 class Commands::SoundSensor
-
+  
+  include Commands::Sensor
+  
   attr_reader :port, :mode
   attr_accessor :trigger_point, :comparison
   
@@ -30,25 +35,10 @@ class Commands::SoundSensor
     @mode           = "dba"
     set_mode
   end
-
-  def port=(port)
-    @port = port
-    set_mode
-  end
-
+  
   def mode=(mode)
     @mode = mode
     set_mode
-  end
-
-  # returns true or false based on comparison and trigger point
-  def logic
-    case @comparison
-      when ">"
-        sound_level >= @trigger_point ? true : false
-      when "<"
-        sound_level <= @trigger_point ? true : false
-    end
   end
   
   # scaled value read from sensor

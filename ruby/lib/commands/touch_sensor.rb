@@ -14,8 +14,13 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/sensor'
+
 # Implements the "Touch Sensor" block in NXT-G
 class Commands::TouchSensor
+
+  include Commands::Sensor
 
   attr_reader :port, :action
   
@@ -28,14 +33,14 @@ class Commands::TouchSensor
     set_mode
   end
 
-  def port=(port)
-    @port = port
-    set_mode
-  end
-
   def action=(action)
     @action = action
     set_mode
+  end
+  alias trigger_point= action=
+  
+  def comparison=(op)
+  	raise NotImplementedError, "Cannot assign a comparison operator for this sensor type."
   end
 
   # returns true or false based on action type

@@ -14,9 +14,14 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-# Implements the "Light Sensor" block in NXT-G
-class Commands::LightSensor
+require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/sensor'
 
+# Implements (and extens) the "Light Sensor" block in NXT-G
+class Commands::LightSensor
+  
+  include Commands::Sensor
+  
   attr_reader :port, :generate_light
   attr_accessor :trigger_point, :comparison
   
@@ -30,32 +35,30 @@ class Commands::LightSensor
     @generate_light = true
     set_mode
   end
-
-  def port=(port)
-    @port = port
-    set_mode
+  
+  # Turns off the sensor's LED light.
+  def ambient_mode
+    self.generate_light = false
   end
-
-  # Determines if the sensor's own LED is on or not (true or false)
-  def generate_light=(logic)
-    @generate_light = logic
-    set_mode
+  
+  # Turns on the sensor's LED light.
+  def illuminated_mode
+    self.generate_light = true
   end
-
-  # returns true or false based on comparison and trigger point
-  def logic
-    case @comparison
-      when ">"
-        intensity >= @trigger_point ? true : false
-      when "<"
-        intensity <= @trigger_point ? true : false
-    end
+  
+  # Turns the sensor's LED on or off.
+  # Takes true or false as the argument; if true, light will be turned on,
+  # if false, light will be turned off.
+  def generate_light=(on)
+    @generate_light = on
+    set_mode
   end
   
   # intensity of light detected 0-100 in %
   def intensity
     value_scaled
   end
+  alias light_level intensity
   
   # returns the raw value of the sensor
   def raw_value
