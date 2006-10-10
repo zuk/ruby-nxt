@@ -14,21 +14,25 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/mixins/motor'
+
 # Implements the "Motor" block in NXT-G
 class Commands::Motor
   
+  include Commands::Mixins::Motor 
+
   attr_accessor :port
   attr_accessor :direction
   attr_accessor :steering
   attr_accessor :action
   attr_accessor :power
   attr_accessor :control_power
-  attr_accessor :duration
   attr_accessor :wait
   attr_accessor :next_action
   
-  def initialize(nxt = nil)
-    @nxt          = nxt || NXTComm.new($DEV)
+  def initialize(nxt = NXTComm.new($DEV))
+    @nxt          = nxt
     
     # defaults the same as NXT-G
     @port           = :a
@@ -41,46 +45,6 @@ class Commands::Motor
     @next_action    = :brake
   end
   
-  # Sets the duration of the motor movement.
-  # The parameter should be a Hash like one of the following:
-  #   m.duration = {:seconds => 4 }
-  #   m.duration = {:degrees => 180 }
-  #   m.duration = {:rotations => 2 }
-  # To set the duration to unlimited (i.e. rotate indefinitely) you should set 
-  # the duration to :unlimited, although this is equivalent to simply setting it to nil;
-  # the following expressions are equivalent:
-  #   m.duration = nil
-  #   m.duration = :unlimited
-  # If you assign an integer, it will be assumed that you are specifying seconds;
-  # the following are equivalent:
-  #   m.duration = 4
-  #   m.duration = {:seconds => 4}
-  # If you assign a float, it will be assumed that youa re specifying rotations;
-  # the following expressions are equivalent:
-  #   m.duration = 2.0
-  #   m.duration = {:rotations => 2}
-  def duration=(duration)
-    if duration.kind_of? Hash
-      @duration = duration
-    elsif duration.kind_of? Integer
-      @duration = {:seconds => duration}
-    elsif duration.kind_of? Float
-      @duration = {:rotations => duration}
-    elsif duration == :unlimited
-      @duration = nil
-    else
-      @duration = duration
-    end
-  end
-  
-  def duration
-    if duration.nil?
-      :unlimited
-    else
-      @duration
-    end
-  end
-
   # execute the Motor command based on the properties specified
   def start
     @nxt.reset_motor_position(NXTComm.const_get("MOTOR_#{@port.to_s.upcase}"))
@@ -104,22 +68,6 @@ class Commands::Motor
       reg_mode = NXTComm::REGULATION_MODE_IDLE
     end
     
-    if @duration.kind_of? Hash
-      if @duration[:rotations]
-        tacho_limit = @duration[:rotations] * 360
-      end
-    
-      if @duration[:degrees]
-        tacho_limit = @duration[:degrees]
-      end
-    
-      if @duration[:seconds]
-        tacho_limit = 0
-      end
-    else
-      tacho_limit = 0
-    end
-
     if @duration
       if @duration[:degrees] or @duration[:seconds]
         case @action
