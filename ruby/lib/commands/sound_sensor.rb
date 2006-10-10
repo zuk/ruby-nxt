@@ -15,12 +15,12 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
-require File.dirname(File.expand_path(__FILE__))+'/sensor'
+require File.dirname(File.expand_path(__FILE__))+'/mixins/sensor'
 
 # Implements the "Sound Sensor" block in NXT-G
 class Commands::SoundSensor
   
-  include Commands::Sensor
+  include Commands::Mixins::Sensor
   
   attr_reader :port, :mode
   attr_accessor :trigger_point, :comparison

@@ -16,12 +16,12 @@
 
 require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
 require File.dirname(File.expand_path(__FILE__))+'/../ultrasonic_comm'
-require File.dirname(File.expand_path(__FILE__))+'/sensor'
+require File.dirname(File.expand_path(__FILE__))+'/mixins/sensor'
 
 # Implements the "Ultrasonic Sensor" block in NXT-G
 class Commands::UltrasonicSensor
   
-  include Commands::Sensor
+  include Commands::Mixins::Sensor
   
   # Exception thrown by distance! when the sensor cannot determine the distance.
   class UnmeasurableDistance < Exception; end

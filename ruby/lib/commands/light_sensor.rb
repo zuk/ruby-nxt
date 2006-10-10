@@ -15,12 +15,12 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
-require File.dirname(File.expand_path(__FILE__))+'/sensor'
+require File.dirname(File.expand_path(__FILE__))+'/mixins/sensor'
 
 # Implements (and extens) the "Light Sensor" block in NXT-G
 class Commands::LightSensor
   
-  include Commands::Sensor
+  include Commands::Mixins::Sensor
   
   attr_reader :port, :generate_light
   attr_accessor :trigger_point, :comparison
