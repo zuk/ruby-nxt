@@ -16,19 +16,23 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Common methods used in sensor commands.
-module Commands::Sensor
-  def port=(port)
-    @port = port
-    set_mode
-  end
-  
-  def comparison=(op)
-    raise ArgumentError, "'#{op}' is not a valid comparison operator." unless op =~ /^([<>=]=?|!=)$/
-    @comparison = op
-  end
-  
-  # Returns true or false based on comparison and trigger point.
-  def logic
-    eval "value_scaled #{@comparison} @trigger_point"
+module Commands
+  module Mixins
+    module Sensor
+      def port=(port)
+        @port = port
+        set_mode
+      end
+      
+      def comparison=(op)
+        raise ArgumentError, "'#{op}' is not a valid comparison operator." unless op =~ /^([<>=]=?|!=)$/
+        @comparison = op
+      end
+      
+      # Returns true or false based on comparison and trigger point.
+      def logic
+        eval "value_scaled #{@comparison} @trigger_point"
+      end
+    end
   end
 end
