@@ -15,13 +15,13 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 begin
-	require "serialport"
+  require "serialport"
 rescue LoadError
-	puts
-	puts "You must have the ruby-serialport library installed!"
-	puts "You can download ruby-serialport from http://rubyforge.org/projects/ruby-serialport/"
-	puts
-	exit 1
+  puts
+  puts "You must have the ruby-serialport library installed!"
+  puts "You can download ruby-serialport from http://rubyforge.org/projects/ruby-serialport/"
+  puts
+  exit 1
 end
 
 require "thread"
@@ -204,16 +204,16 @@ class NXTComm
   # If two NXTComms try to talk to the same dev, there will be trouble. 
   def initialize(dev = $DEV)
   
-		@@mutex.synchronize do
-	    begin
-		    @sp = SerialPort.new(dev, 57600, 8, 1, SerialPort::NONE)
-		  
-		    @sp.flow_control = SerialPort::HARD
-		    @sp.read_timeout = 5000
-	    rescue Errno::EBUSY
-	      raise "Cannot connect to #{dev}. The serial port is busy or unavailable."
-	    end
-		end
+    @@mutex.synchronize do
+      begin
+        @sp = SerialPort.new(dev, 57600, 8, 1, SerialPort::NONE)
+      
+        @sp.flow_control = SerialPort::HARD
+        @sp.read_timeout = 5000
+      rescue Errno::EBUSY
+        raise "Cannot connect to #{dev}. The serial port is busy or unavailable."
+      end
+    end
     
     if @sp.nil?
       $stderr.puts "Cannot connect to #{dev}"
@@ -272,23 +272,27 @@ class NXTComm
   
   # Process the reply
   def recv_reply
-  	@@mutex.synchronize do
-	    while (len_header = @sp.sysread(2))
-	      msg = @sp.sysread(len_header.unpack("v")[0])
-	      puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
-	      
-	      if msg[0] != 0x02
-	        error = "ERROR: Returned something other then a reply telegram"
-	        return [false,error]
-	      end
-	      
-	      if msg[2] != 0x00
-	        error = "ERROR: #{@@error_codes[msg[2]]}"
-	        return [false,error]
-	      end
-	      
-	      return [true,msg]
-	    end
+    @@mutex.synchronize do
+      begin
+        while (len_header = @sp.sysread(2))
+          msg = @sp.sysread(len_header.unpack("v")[0])
+          puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
+        
+          if msg[0] != 0x02
+            error = "ERROR: Returned something other then a reply telegram"
+            return [false,error]
+          end
+        
+          if msg[2] != 0x00
+            error = "ERROR: #{@@error_codes[msg[2]]}"
+            return [false,error]
+          end
+        
+          return [true,msg]
+        end
+      rescue EOFError
+      	raise "Cannot read from the NXT. Make sure the device is on and connected."
+      end
     end
   end
 
@@ -427,9 +431,9 @@ class NXTComm
       result_parts[1] == 0x01 ? result_parts[1] = true : result_parts[1] = false
       result_parts[2] == 0x01 ? result_parts[2] = true : result_parts[2] = false
 
-			(7..8).each do |i|
-				# convert to signed word
-				# FIXME: is this right?
+      (7..8).each do |i|
+        # convert to signed word
+        # FIXME: is this right?
         result_parts[i] = -1*(result_parts[i]^0xffff) if result_parts[i] > 0xfff
       end
 
@@ -561,7 +565,7 @@ class NXTComm
     cmd = [port]
     result = send_and_receive @@op_codes["ls_read"], cmd
     if result
-    	result = result.from_hex_str
+      result = result.from_hex_str
       {
         :bytes_read => result[0],
         :data       => result[1..-1]
