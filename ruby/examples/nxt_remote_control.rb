@@ -8,7 +8,7 @@ require File.dirname(File.expand_path(__FILE__))+'/../lib/autodetect_nxt'
 class NXTRemoteControl
   
   def initialize
-    @nxt  = NXT.new($DEV)
+    @nxt  = NXTComm.new($DEV)
     ph    = { 'padx' => 10, 'pady' => 10 }
     root  = TkRoot.new { title "NXT Remote Control" }
     top   = TkFrame.new(root)
@@ -36,37 +36,35 @@ class NXTRemoteControl
 
   def forward
     @text.value = "Moving forward..."
-    @nxt.motors_ab do |m|
-      m.forward(:power => 75, :regulate => true, :regulation_mode => "sync")
-    end
+    @m = Commands::Move.new(@nxt)
+    @m.start
   end
   
   def backward
     @text.value = "Moving backward..."
-    @nxt.motors_ab do |m|
-      m.backward(:power => 75, :regulate => true, :regulation_mode => "sync")
-    end
+    @m = Commands::Move.new(@nxt)
+    @m.direction = :backward
+    @m.start
   end
   
   def left
     @text.value = "Turning left"
-    @nxt.motors_ab do |m|
-      m.forward(:power => 75, :regulate => true, :ratio => -50, :regulation_mode => "sync")
-    end
+    @m = Commands::Move.new(@nxt)
+    @m.steering = :left
+    @m.start
   end
   
   def right
     @text.value = "Turning right"
-    @nxt.motors_ab do |m|
-      m.forward(:power => 75, :regulate => true, :ratio => 50, :regulation_mode => "sync")
-    end
+    @m = Commands::Move.new(@nxt)
+    @m.steering = :right
+    @m.start
   end
   
   def stop
     @text.value = "Stopping"
-    @nxt.motors_ab do |m|
-      m.stop
-    end
+    @m = Commands::Move.new(@nxt)
+    @m.stop
   end
 end
 
