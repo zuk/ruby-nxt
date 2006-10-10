@@ -27,8 +27,8 @@ class Commands::Motor
   attr_accessor :wait
   attr_accessor :next_action
   
-  def initialize(nxt)
-    @nxt          = nxt
+  def initialize(nxt = nil)
+    @nxt          = nxt || NXTComm.new($DEV)
     
     # defaults the same as NXT-G
     @port           = :a
@@ -36,9 +36,49 @@ class Commands::Motor
     @action         = :constant
     @power          = 75
     @control_power  = false
-    @duration       = :unlimited
+    @duration       = nil # Same as :unlimited
     @wait           = false
     @next_action    = :brake
+  end
+  
+  # Sets the duration of the motor movement.
+  # The parameter should be a Hash like one of the following:
+  #   m.duration = {:seconds => 4 }
+  #   m.duration = {:degrees => 180 }
+  #   m.duration = {:rotations => 2 }
+  # To set the duration to unlimited (i.e. rotate indefinitely) you should set 
+  # the duration to :unlimited, although this is equivalent to simply setting it to nil;
+  # the following expressions are equivalent:
+  #   m.duration = nil
+  #   m.duration = :unlimited
+  # If you assign an integer, it will be assumed that you are specifying seconds;
+  # the following are equivalent:
+  #   m.duration = 4
+  #   m.duration = {:seconds => 4}
+  # If you assign a float, it will be assumed that youa re specifying rotations;
+  # the following expressions are equivalent:
+  #   m.duration = 2.0
+  #   m.duration = {:rotations => 2}
+  def duration=(duration)
+    if duration.kind_of? Hash
+      @duration = duration
+    elsif duration.kind_of? Integer
+      @duration = {:seconds => duration}
+    elsif duration.kind_of? Float
+      @duration = {:rotations => duration}
+    elsif duration == :unlimited
+      @duration = nil
+    else
+      @duration = duration
+    end
+  end
+  
+  def duration
+    if duration.nil?
+      :unlimited
+    else
+      @duration
+    end
   end
 
   # execute the Motor command based on the properties specified
@@ -64,7 +104,7 @@ class Commands::Motor
       reg_mode = NXTComm::REGULATION_MODE_IDLE
     end
     
-    if @duration.class == Hash
+    if @duration.kind_of? Hash
       if @duration[:rotations]
         tacho_limit = @duration[:rotations] * 360
       end
@@ -80,7 +120,7 @@ class Commands::Motor
       tacho_limit = 0
     end
 
-    if @duration != :unlimited
+    if @duration
       if @duration[:degrees] or @duration[:seconds]
         case @action
           when :constant
@@ -103,8 +143,8 @@ class Commands::Motor
       tacho_limit
     )
     
-    if @duration != :unlimited or @duration[:seconds] or @wait
-      if @duration[:seconds]
+    if (@duration and @duration[:seconds]) or @wait
+      if @duration and @duration[:seconds]
         sleep(@duration[:seconds])
       else
         until self.run_state == NXTComm::MOTOR_RUN_STATE_IDLE
