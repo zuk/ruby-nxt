@@ -14,26 +14,30 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
+require File.dirname(File.expand_path(__FILE__))+'/mixins/motor'
+
 # Implements the "Move" block in NXT-G
 class Commands::Move
+
+  include Commands::Mixins::Motor 
   
   attr_reader   :ports
   attr_accessor :direction
-  attr_accessor :steering
+  attr_accessor :turn_ratio, :left_motor, :right_motor
   attr_accessor :power
-  attr_accessor :duration
   attr_accessor :next_action
   
-  def initialize(nxt)
+  def initialize(nxt = NXTComm.new($DEV))
     @nxt          = nxt
     
     # defaults the same as NXT-G
     @ports        = [:b, :c]
     @direction    = :forward
-    @steering     = {:left_motor => :b, :right_motor => :c, :direction => :straight, :power => 100}
     @power        = 75
     @duration     = {:rotations => 1}
     @next_action  = :brake
+    self.turn_ratio = :straight
   end
 
   def ports=(value)
@@ -45,7 +49,42 @@ class Commands::Move
       else raise "Invalid port type #{value.class}"
     end
   end
-  alias_method :port=, :ports=
+  alias port= ports=
+
+  def turn_ratio=(turn_ratio)
+    # simplified steering... if the user wants fine control, they should just specify -100 to 100
+    case turn_ratio
+      when :straight then @turn_ratio = 0
+      when :spin_left then @turn_ratio = -100
+      when :spin_right then @turn_ratio = 100
+      when :left then @turn_ratio = -50
+      when :right then @turn_ration = 50
+      else @turn_ratio = turn_ratio
+    end
+
+    # DEPRECATED: for backwards compatibility we parse the argument as a hash... I think though that this should be deprecated
+    if turn_ratio.kind_of? Hash
+      old_steering = turn_ratio
+      self.left_motor = old_steering[:left_motor] if old_steering.has_key? :left_motor
+      self.right_motor = old_steering[:right_motor] if old_steering.has_key? :right_motor
+      if old_steering[:power]
+        self.turn_ratio = old_steering[:power] * (old_steering[:direction] == :left ? -1 : 1)
+      else
+        self.turn_ratio = old_steering[:direction]
+      end
+    end
+  end
+  alias steering= turn_ratio=
+
+  def turn_ratio
+    if @ports.size > 1
+      @turn_ratio
+    else
+      0
+    end
+  end
+  alias steering turn_ratio
+  
 
   # execute the Move command based on the properties specified
   def start
@@ -66,38 +105,8 @@ class Commands::Move
     if @ports.size == 2
       mode |= NXTComm::REGULATED
       reg_mode = NXTComm::REGULATION_MODE_MOTOR_SYNC
-
-      case @steering[:direction]
-        when :straight
-          turn_ratio = 0
-        when :spin_left
-          turn_ratio = -100
-        when :spin_right
-          turn_ratio = 100
-        when :left
-          @steering[:power].nil? ? turn_ratio = -50 : turn_ratio = -@steering[:power]
-        when :right
-          @steering[:power].nil? ? turn_ratio = 50 : turn_ratio = @steering[:power]
-      end
     else
       reg_mode = NXTComm::REGULATION_MODE_IDLE
-      turn_ratio = 0
-    end
-    
-    if @duration.class == Hash
-      if @duration[:rotations]
-        tacho_limit = @duration[:rotations] * 360
-      end
-    
-      if @duration[:degrees]
-        tacho_limit = @duration[:degrees]
-      end
-    
-      if @duration[:seconds]
-        tacho_limit = 0
-      end
-    else
-      tacho_limit = 0
     end
     
     if @ports.include?(:a) and @ports.include?(:b) and @ports.include?(:c)
@@ -124,7 +133,7 @@ class Commands::Move
       end
     end
     
-    unless @duration == :unlimited
+    unless @duration.nil?
       if @duration[:seconds]
         sleep(@duration[:seconds])
       else
