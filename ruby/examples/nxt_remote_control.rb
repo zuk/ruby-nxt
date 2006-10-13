@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'tk'
-require File.dirname(File.expand_path(__FILE__))+'/../lib/nxt'
-
-require File.dirname(File.expand_path(__FILE__))+'/../lib/autodetect_nxt'
+require "tk"
+require "nxt"
 
 class NXTRemoteControl
   

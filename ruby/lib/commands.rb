@@ -28,15 +28,13 @@
 #   puts "Got it!"
 #
 module Commands
-
-  require File.dirname(File.expand_path(__FILE__))+'/commands/move'
-  require File.dirname(File.expand_path(__FILE__))+'/commands/sound'
-  require File.dirname(File.expand_path(__FILE__))+'/commands/motor'
-
-  require File.dirname(File.expand_path(__FILE__))+'/commands/touch_sensor'
-  require File.dirname(File.expand_path(__FILE__))+'/commands/sound_sensor'
-  require File.dirname(File.expand_path(__FILE__))+'/commands/light_sensor'
-  require File.dirname(File.expand_path(__FILE__))+'/commands/ultrasonic_sensor'
-  require File.dirname(File.expand_path(__FILE__))+'/commands/rotation_sensor'
-
+  require 'commands/move'
+  require 'commands/sound'
+  require 'commands/motor'
+  
+  require 'commands/touch_sensor'
+  require 'commands/sound_sensor'
+  require 'commands/light_sensor'
+  require 'commands/ultrasonic_sensor'
+  require 'commands/rotation_sensor'
 end

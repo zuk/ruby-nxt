@@ -14,8 +14,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
-require File.dirname(File.expand_path(__FILE__))+'/mixins/motor'
+require "nxt_comm"
+require "commands/mixins/motor"
 
 # Implements the "Move" block in NXT-G
 class Commands::Move
@@ -24,7 +24,7 @@ class Commands::Move
   
   attr_reader   :ports
   attr_accessor :direction
-  attr_accessor :turn_ratio, :left_motor, :right_motor
+  attr_accessor :left_motor, :right_motor
   attr_accessor :power
   attr_accessor :next_action
   

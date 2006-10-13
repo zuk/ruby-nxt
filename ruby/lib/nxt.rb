@@ -14,15 +14,15 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require File.dirname(File.expand_path(__FILE__))+'/autodetect_nxt'
+require "autodetect_nxt"
 
-require File.dirname(File.expand_path(__FILE__))+'/nxt_comm'
-require File.dirname(File.expand_path(__FILE__))+'/motor'
+require "nxt_comm"
+require "motor"
 
-require File.dirname(File.expand_path(__FILE__))+'/sensors/touch_sensor'
-require File.dirname(File.expand_path(__FILE__))+'/sensors/sound_sensor'
-require File.dirname(File.expand_path(__FILE__))+'/sensors/light_sensor'
-require File.dirname(File.expand_path(__FILE__))+'/sensors/ultrasonic_sensor'
+require "sensors/touch_sensor"
+require "sensors/sound_sensor"
+require "light_sensor"
+require "ultrasonic_sensor"
 
 # High-level interface for controlling motors and sensors connected to the NXT.
 # Currently only motors and some other misc functionality is implemented.

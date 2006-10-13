@@ -25,7 +25,7 @@ rescue LoadError
 end
 
 require "thread"
-require File.dirname(File.expand_path(__FILE__))+'/commands'
+require "commands"
 
 class Array
   def to_hex_str

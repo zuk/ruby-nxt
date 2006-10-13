@@ -36,19 +36,19 @@ class UltrasonicComm
   
   # value is the i2c address (all of these ops always expect to return 1 byte)
   @@var_codes = {  
-    'read_continuous_measurements_interval'  => 0x40,
-    'read_command_state'         => 0x41,
-    'read_measurement_byte_0'     => 0x42,
-    'read_measurement_byte_1'     => 0x43,
-    'read_measurement_byte_2'     => 0x44,
-    'read_measurement_byte_3'     => 0x45,
-    'read_measurement_byte_4'     => 0x46,
-    'read_measurement_byte_5'    => 0x47,
-    'read_measurement_byte_6'    => 0x48,
-    'read_measurement_byte_7'    => 0x49,
-    'read_actual_zero'           => 0x50,
-    'read_actual_scale_factor'   => 0x51,
-    'read_actual_scale_divisor'  => 0x52,
+    'read_continuous_measurements_interval' => 0x40,
+    'read_command_state'                    => 0x41,
+    'read_measurement_byte_0'               => 0x42,
+    'read_measurement_byte_1'               => 0x43,
+    'read_measurement_byte_2'               => 0x44,
+    'read_measurement_byte_3'               => 0x45,
+    'read_measurement_byte_4'               => 0x46,
+    'read_measurement_byte_5'               => 0x47,
+    'read_measurement_byte_6'               => 0x48,
+    'read_measurement_byte_7'               => 0x49,
+    'read_actual_zero'                      => 0x50,
+    'read_actual_scale_factor'              => 0x51,
+    'read_actual_scale_divisor'             => 0x52,
   }
   
   # first value is the i2c address, second value is the command

@@ -1,7 +1,6 @@
 #!/usr/local/bin/ruby
 
-require 'yaml'
-require File.dirname(File.expand_path(__FILE__))+'/../lib/nxt_comm'
+require "nxt_comm"
 
 $DEBUG = false
 
@@ -19,25 +18,25 @@ $DEBUG = false
 
 @nxt.play_tone(500,500)
 
-@nxt.set_output_state(
-  NXTComm::MOTOR_A,
-  100,
-  NXTComm::REGULATED,
-  NXTComm::REGULATION_MODE_MOTOR_SPEED,
-  100,
-  NXTComm::MOTOR_RUN_STATE_RUNNING,
-  0
-)
-sleep(3)
-@nxt.set_output_state(
-  NXTComm::MOTOR_A,
-  100,
-  NXTComm::BRAKE,
-  NXTComm::REGULATION_MODE_MOTOR_SPEED,
-  0,
-  NXTComm::MOTOR_RUN_STATE_RAMPDOWN,
-  0
-)
+# @nxt.set_output_state(
+#   NXTComm::MOTOR_A,
+#   100,
+#   NXTComm::REGULATED,
+#   NXTComm::REGULATION_MODE_MOTOR_SPEED,
+#   100,
+#   NXTComm::MOTOR_RUN_STATE_RUNNING,
+#   0
+# )
+# sleep(3)
+# @nxt.set_output_state(
+#   NXTComm::MOTOR_A,
+#   100,
+#   NXTComm::BRAKE,
+#   NXTComm::REGULATION_MODE_MOTOR_SPEED,
+#   0,
+#   NXTComm::MOTOR_RUN_STATE_RAMPDOWN,
+#   0
+# )
 
 # set_input_mode(port,type,mode)
 # @nxt.set_input_mode(NXTComm::SENSOR_3,NXTComm::LIGHT_INACTIVE,NXTComm::RAWMODE)

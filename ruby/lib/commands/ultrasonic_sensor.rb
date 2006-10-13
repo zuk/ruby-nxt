@@ -14,9 +14,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-require File.dirname(File.expand_path(__FILE__))+'/../nxt_comm'
-require File.dirname(File.expand_path(__FILE__))+'/../ultrasonic_comm'
-require File.dirname(File.expand_path(__FILE__))+'/mixins/sensor'
+require "nxt_comm"
+require "ultrasonic_comm"
+require "commands/mixins/sensor"
 
 # Implements the "Ultrasonic Sensor" block in NXT-G
 class Commands::UltrasonicSensor

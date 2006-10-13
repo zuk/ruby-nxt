@@ -4,8 +4,8 @@
 #   telnet localhost 3001
 #   type forward then enter
 
-require File.dirname(File.expand_path(__FILE__))+'/../lib/nxt_comm'
 require "socket"
+require "nxt_comm"
 
 $DEBUG = true
 

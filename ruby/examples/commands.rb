@@ -2,7 +2,7 @@
 
 # TODO this should really be placed in the interactive tests directory...
 
-require File.dirname(File.expand_path(__FILE__))+'/../lib/nxt_comm'
+require "nxt_comm"
 
 $DEV = '/dev/tty.NXT-DevB-1'
 
@@ -175,6 +175,6 @@ def do_ultrasonic_sensor
   puts "Got it!"
 end
 
-do_ultrasonic_sensor
+do_sound
 
 puts "Finished."
