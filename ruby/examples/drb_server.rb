@@ -1,39 +1,40 @@
 #!/usr/bin/env ruby -w
 # example code showing how to make a drb server to communicate with nxt
+# it also spawns a thread that periodically calls keep_alive to prevent
+# the nxt from going to sleep
 
-require File.dirname(File.expand_path(__FILE__))+'/../lib/nxt_comm'
-require 'drb'
+require "drb"
+require "thread"
+require "nxt_comm"
 
-$DEBUG = true
+$DEBUG = false
 $DEV = '/dev/tty.NXT-DevB-1'
 $SAFE = 1 # disable eval() and friends
 
-class NXTComm
-  # SerialPort can't be marshalled
-  include DRbUndumped
-end
-
 class NXTServer
-  private_class_method :new
-  @@nxts = {}
+  def initialize(dev=$DEV,port=9000)
+    @nxt = NXTComm.new(dev)
+    @last_keep_alive = Time.now
+    @keep_alive_time = 300
 
-  def NXTServer.connect(dev=$DEV)
-    # TODO have to fix NXTComm#connected? since it returns true even if NXT turns off
-    if !@@nxts[dev] or !@@nxts[dev].connected?
-      @@nxts[dev] = NXTComm.new(dev)
+    Thread.new do
+      DRb.start_service "druby://localhost:#{port}", @nxt
+      puts "NXTServer ready at: #{DRb.uri}"
     end
-    @@nxts[dev]
+
+    Thread.new do
+      loop do
+        if Time.now - @last_keep_alive > @keep_alive_time / 2
+          @keep_alive_time = @nxt.keep_alive / 1000
+          puts "Sending next keep alive in #{@keep_alive_time / 2} seconds..."
+          @last_keep_alive = Time.now
+        end
+        # need small sleep time or DRb thread won't have time to fire
+        # I can't get it to work if I just sleep the keep_alive interval
+        sleep 1 
+      end
+    end.join # make thread block
   end
 end
 
-# TODO is this even possible?
-# keepalive_thread = Thread.new do
-#   nxt = server.connect
-#   sleep_time = nxt.keep_alive
-#   puts "Sending keep alive in #{sleep_time / 2000} seconds..."
-#   sleep(sleep_time / 2000)
-# end
-
-DRb.start_service 'druby://localhost:9000', NXTServer.connect
-puts DRb.uri
-DRb.thread.join
+server = NXTServer.new
