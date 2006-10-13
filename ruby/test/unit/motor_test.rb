@@ -1,7 +1,7 @@
-require 'test/unit'
-require File.dirname(File.expand_path(__FILE__))+'/../../lib/motor'
-
-require File.dirname(File.expand_path(__FILE__))+'/../../lib/autodetect_nxt'
+require File.dirname(__FILE__) + '/../test_helper'
+require "test/unit"
+require "motor"
+require "autodetect_nxt"
 
 class MotorTest < Test::Unit::TestCase
 

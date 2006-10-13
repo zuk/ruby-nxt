@@ -1,6 +1,7 @@
-require 'test/unit'
-require 'stringio'
-require File.dirname(File.expand_path(__FILE__))+'/../../lib/nxt_comm'
+require File.dirname(__FILE__) + '/../test_helper'
+require "test/unit"
+require "stringio"
+require "nxt_comm"
 
 $DEV = '/dev/tty.NXT-DevB-1'
 

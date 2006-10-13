@@ -1,10 +1,10 @@
-require File.dirname(File.expand_path(__FILE__))+'/../../lib/commands'
-
-require File.dirname(File.expand_path(__FILE__))+'/interactive_test_helper.rb'
+require File.dirname(__FILE__) + '/../test_helper'
+require "commands"
+require "interactive_test_helper"
 
 include InteractiveTestHelper
 
-require File.dirname(File.expand_path(__FILE__))+'/../../lib/autodetect_nxt'
+require "autodetect_nxt"
 
 info "Connecting to the NXT at #{$DEV}..."
 
