@@ -67,7 +67,7 @@ end
 # 
 # For instructions on creating a bluetooth serial port connection:
 # * Linux: http://juju.org/articles/2006/10/22/bluetooth-serial-port-to-nxt-in-linux
-# * OSX: http://juju.org/articles/2006/08/01/mindstorms-nxt-bluetooth-on-osx
+# * OSX: http://juju.org/articles/2006/10/22/bluetooth-serial-port-to-nxt-in-osx
 # * Windows: http://juju.org/articles/2006/08/16/ruby-serialport-nxt-on-windows
 #
 # =Examples
