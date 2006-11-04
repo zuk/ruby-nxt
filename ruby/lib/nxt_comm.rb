@@ -15,7 +15,8 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 begin
-  require "serialport"
+  # Need to do a Kernel::require otherwise when included with rubygems, it fails
+  Kernel::require "serialport"
 rescue LoadError
   puts
   puts "You must have the ruby-serialport library installed!"
@@ -23,7 +24,6 @@ rescue LoadError
   puts
   exit 1
 end
-
 require "thread"
 require "commands"
 
