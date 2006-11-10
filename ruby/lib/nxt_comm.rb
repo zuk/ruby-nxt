@@ -155,29 +155,57 @@ class NXTComm
   MODEMASK            = 0xE0
   
   @@op_codes = {
-    'start_program'             => 0x00,
-    'stop_program'              => 0x01,
-    'play_sound_file'           => 0x02,
-    'play_tone'                 => 0x03,
-    'set_output_state'          => 0x04,
-    'set_input_mode'            => 0x05,
-    'get_output_state'          => 0x06,
-    'get_input_values'          => 0x07,
-    'reset_input_scaled_value'  => 0x08,
-    'message_write'             => 0x09,
-    'reset_motor_position'      => 0x0A,
-    'get_battery_level'         => 0x0B,
-    'stop_sound_playback'       => 0x0C,
-    'keep_alive'                => 0x0D,
-    'ls_get_status'             => 0x0E,
-    'ls_write'                  => 0x0F,
-    'ls_read'                   => 0x10,
-    'get_current_program_name'  => 0x11,
-    # what happened to 0x12?  Dunno...
-    'message_read'              => 0x13
+    # Direct Commands
+    'start_program'             => ["direct",0x00],
+    'stop_program'              => ["direct",0x01],
+    'play_sound_file'           => ["direct",0x02],
+    'play_tone'                 => ["direct",0x03],
+    'set_output_state'          => ["direct",0x04],
+    'set_input_mode'            => ["direct",0x05],
+    'get_output_state'          => ["direct",0x06],
+    'get_input_values'          => ["direct",0x07],
+    'reset_input_scaled_value'  => ["direct",0x08],
+    'message_write'             => ["direct",0x09],
+    'reset_motor_position'      => ["direct",0x0A],
+    'get_battery_level'         => ["direct",0x0B],
+    'stop_sound_playback'       => ["direct",0x0C],
+    'keep_alive'                => ["direct",0x0D],
+    'ls_get_status'             => ["direct",0x0E],
+    'ls_write'                  => ["direct",0x0F],
+    'ls_read'                   => ["direct",0x10],
+    'get_current_program_name'  => ["direct",0x11],
+    'message_read'              => ["direct",0x13],
+    # System Commands
+    'open_read_command'         => ["system",0x80],
+    'open_write_command'        => ["system",0x81],
+    'read_command'              => ["system",0x82],
+    'write_command'             => ["system",0x83],
+    'close_command'             => ["system",0x84],
+    'delete_command'            => ["system",0x85],
+    'find_first'                => ["system",0x86],
+    'find_next'                 => ["system",0x87],
+    'get_firmware_version'      => ["system",0x88],
+    'open_write_linear'         => ["system",0x89],
+    'open_read_linear'          => ["system",0x8A], # internal command?
+    'open_write_data'           => ["system",0x8B],
+    'open_append_data'          => ["system",0x8C],
+    'boot_command'              => ["system",0x97], # USB only...
+    'set_brick_name'            => ["system",0x98],
+    'get_device_info'           => ["system",0x9B],
+    'delete_user_flash'         => ["system",0xA0],
+    'poll_command_length'       => ["system",0xA1],
+    'poll_command'              => ["system",0xA2],
+    'bluetooth_factory_reset'   => ["system",0xA4], # cannot be transmitted via bluetooth
+    # IO-Map Access
+    'request_first_module'      => ["system",0x90],
+    'request_next_module'       => ["system",0x91],
+    'close_module_handle'       => ["system",0x92],
+    'read_io_map'               => ["system",0x94],
+    'write_io_map'              => ["system",0x95]
   }
   
   @@error_codes = {
+    # Direct Commands
     0x20 => "Pending communication transaction in progress",
     0x40 => "Specified mailbox queue is empty",
     0xBD => "Request failed (i.e. specified file not found)",
@@ -194,7 +222,27 @@ class NXTComm
     0xEF => "Attempted to access invalid field of a structure",
     0xF0 => "Bad input or output specified",
     0xFB => "Insufficient memory available",
-    0xFF => "Bad arguments"
+    0xFF => "Bad arguments",
+    # System Commands
+    0x81 => "No more handles",
+    0x82 => "No space",
+    0x83 => "No more files",
+    0x84 => "End of file expected",
+    0x85 => "End of file",
+    0x86 => "Not a linear file",
+    0x87 => "File not found",
+    0x88 => "Handle all ready closed",
+    0x89 => "No linear space",
+    0x8A => "Undefined error",
+    0x8B => "File is busy",
+    0x8C => "No write buffers",
+    0x8D => "Append not possible",
+    0x8E => "File is full",
+    0x8F => "File exists",
+    0x90 => "Module not found",
+    0x91 => "Out of boundry",
+    0x92 => "Illegal file name",
+    0x93 => "Illegal handle"
   }
   
   @@mutex = Mutex.new
@@ -235,24 +283,35 @@ class NXTComm
   end
 
   # Send message and return response
-  def send_and_receive(op,cmd)
-    msg = [op] + cmd + [0x00]
+  def send_and_receive(op,cmd,request_reply=true)
+    case op[0]
+    when "direct"
+      request_reply ? command_byte = [0x00] : command_byte = [0x80]
+    when "system"
+      request_reply ? command_byte = [0x01] : command_byte = [0x81]
+    end
+    msg = command_byte + [op[1]] + cmd + [0x00]
     
     send_cmd(msg)
-    ok,response = recv_reply
     
-    if ok and response[1] == op
-      data = response[3..response.size]
-      # TODO ? if data contains a \n character, ruby seems to pass the parts before and after the \n
-      # as two different parameters... we need to encode the data into a format that doesn't
-      # contain any \n's and then decode it in the receiving method
-      data = data.to_hex_str
-    elsif !ok
-      $stderr.puts response
-      data = false
+    if request_reply
+      ok,response = recv_reply
+    
+      if ok and response[1] == op[1]
+        data = response[3..response.size]
+        # TODO ? if data contains a \n character, ruby seems to pass the parts before and after the \n
+        # as two different parameters... we need to encode the data into a format that doesn't
+        # contain any \n's and then decode it in the receiving method
+        data = data.to_hex_str
+      elsif !ok
+        $stderr.puts response
+        data = false
+      else
+        $stderr.puts "ERROR: Unexpected response #{response}"
+        data = false
+      end
     else
-      $stderr.puts "ERROR: Unexpected response #{response}"
-      data = false
+      data = true
     end
     data
   end
@@ -260,7 +319,7 @@ class NXTComm
   # Send direct command bytes
   def send_cmd(msg)
     @@mutex.synchronize do
-      msg = [0x00] + msg # always request a response
+      #msg = [0x00] + msg # direct command, reply required (now set in send_and_receive)
       #puts "Message Size: #{msg.size}" if $DEBUG
       msg = [(msg.size & 255),(msg.size >> 8)] + msg
       puts "Sending Message: #{msg.to_hex_str}" if $DEBUG
@@ -333,9 +392,9 @@ class NXTComm
   # Play a tone.
   # * <tt>freq</tt> - frequency for the tone in Hz
   # * <tt>dur</tt> - duration for the tone in ms
-  def play_tone(freq,dur)
+  def play_tone(freq,dur,request_reply=true)
     cmd = [(freq & 255),(freq >> 8),(dur & 255),(dur >> 8)]
-    result = send_and_receive @@op_codes["play_tone"], cmd
+    result = send_and_receive @@op_codes["play_tone"], cmd, request_reply
     result = true if result == ""
     result
   end
@@ -592,5 +651,19 @@ class NXTComm
     remove ? cmd << 0x01 : cmd << 0x00
     result = send_and_receive @@op_codes["message_read"], cmd
     result == false ? false : result[2..-1].from_hex_str.unpack("A*")[0]
+  end
+  
+  def get_firmware_version
+    cmd = []
+    result = send_and_receive @@op_codes["get_firmware_version"], cmd
+    if result
+      result = result.from_hex_str
+      {
+        :protocol => "#{result[1]}.#{result[0]}",
+        :firmware => "#{result[3]}.#{result[2]}"
+      }
+    else
+      false
+    end
   end
 end
