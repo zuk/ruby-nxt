@@ -653,6 +653,11 @@ class NXTComm
     result == false ? false : result[2..-1].from_hex_str.unpack("A*")[0]
   end
   
+  # Returns the firmware's protocol version and firmware version in a hash:
+  #  {
+  #    :protocol => "1.124",
+  #    :firmware => "1.3"
+  #  }
   def get_firmware_version
     cmd = []
     result = send_and_receive @@op_codes["get_firmware_version"], cmd
@@ -666,4 +671,28 @@ class NXTComm
       false
     end
   end
+  
+  # Returns a hash of information about the nxt:
+  #  {
+  #    :name    => name of the brick,
+  #    :address => bluetooth mac address,
+  #    :signal  => bluetooth signal strength, for some reason always returns 0?
+  #    :free    => free space on flash in bytes
+  #  }
+  def get_device_info
+    cmd = []
+    result = send_and_receive @@op_codes["get_device_info"], cmd
+    if result
+      parts = result.from_hex_str.unpack("Z15C7VV")
+      {
+        :name     => parts[0],
+        :address  => parts[1..6].collect{|b| sprintf("%02x",b)}.join(":"),
+        :signal   => parts[8],
+        :free     => parts[9]
+      }
+    else
+      false
+    end
+  end
+  
 end

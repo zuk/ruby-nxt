@@ -152,4 +152,19 @@ class NXTCommTest < Test::Unit::TestCase
 	def test_ls_read
   end
 	
+	def test_get_firmware_version
+    version = @@nxt.get_firmware_version
+    assert_kind_of Hash, version
+    assert version[:firmware].size > 1
+    assert version[:protocol].size > 1
+	end
+	
+	def test_get_device_info
+	  info = @@nxt.get_device_info
+	  assert_kind_of Hash, info
+	  assert info[:name].size > 0
+	  assert info[:address].size == 17
+	  assert info[:signal].size > 0
+	  assert info[:free].size > 0
+	end
 end
