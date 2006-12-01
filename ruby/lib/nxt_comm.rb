@@ -696,7 +696,7 @@ class NXTComm
   end
   
   # Set the name of the nxt.  Max length 15 characters.
-  def set_brick_name(name)
+  def set_brick_name(name="NXT")
     raise "name too large" if name.size > 15
     cmd = []
     name.each_byte do |b|
@@ -707,4 +707,34 @@ class NXTComm
     result
   end
   
+  # Find a file in flash memory.  The following wildcards are allowed:
+  # * [filename].[extension]
+  # * *.[file type name]
+  # * [filename].*
+  # * *.*
+  # In other words, you can't do partial name searches...
+  # Returns a hash with the following info:
+  #  {
+  #    :handle  => handle number used with other read/write commands,
+  #    :name    => name of the file found,
+  #    :size    => size of the file in bytes
+  #  }
+  def find_first(name="*.*")
+    raise "name too large" if name.size > 19
+    cmd = []
+    name.each_byte do |b|
+      cmd << b
+    end
+    result = send_and_receive @@op_codes["find_first"], cmd
+    if result
+      parts = result.from_hex_str.unpack("CZ19V")
+      {
+        :handle => parts[0],
+        :name   => parts[1],
+        :size   => parts[2]
+      }
+    else
+      false
+    end
+  end
 end

@@ -169,14 +169,32 @@ class NXTCommTest < Test::Unit::TestCase
 	end
 	
 	def test_set_brick_name
-	  old_name = @@nxt.get_device_info[:name]
+	  assert old_name = @@nxt.get_device_info[:name]
 	  assert @@nxt.set_brick_name("Foo")
     sleep 1 # brick tends to lock up for a bit after setting the brick name
-    new_name = @@nxt.get_device_info[:name]
+    assert new_name = @@nxt.get_device_info[:name]
     assert_equal "Foo", new_name
+
     assert @@nxt.set_brick_name(old_name)
     sleep 1
-    new_name = @@nxt.get_device_info[:name]
+    assert new_name = @@nxt.get_device_info[:name]
     assert_equal old_name, new_name
+	end
+	
+	def test_find_first
+	  assert first_file = @@nxt.find_first
+	  assert_kind_of Hash, first_file
+	  assert first_file[:handle].size > 0
+	  assert first_file[:name].size > 0
+	  assert first_file[:size].size > 0
+
+	  assert first_file = @@nxt.find_first("*.rso")
+	  assert_kind_of Hash, first_file
+	  assert first_file[:handle].size > 0
+	  assert first_file[:name].size > 0
+	  assert first_file[:size].size > 0
+	  
+    err = capture_stderr { assert !@@nxt.find_first("*.foo") }
+    assert_equal "ERROR: File not found\n", err
 	end
 end
