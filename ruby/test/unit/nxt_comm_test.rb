@@ -197,4 +197,18 @@ class NXTCommTest < Test::Unit::TestCase
     err = capture_stderr { assert !@@nxt.find_first("*.foo") }
     assert_equal "ERROR: File not found\n", err
 	end
+	
+	def test_find_next
+	  assert file = @@nxt.find_first
+	  assert_kind_of Hash, file
+	  assert file[:handle].size > 0
+	  assert file[:name].size > 0
+	  assert file[:size].size > 0
+
+	  assert next_file = @@nxt.find_next(file[:handle])
+	  assert_kind_of Hash, next_file
+	  assert next_file[:handle].size > 0
+	  assert next_file[:name].size > 0
+	  assert next_file[:size].size > 0
+	end
 end

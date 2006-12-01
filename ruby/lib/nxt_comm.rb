@@ -713,12 +713,17 @@ class NXTComm
   # * [filename].*
   # * *.*
   # In other words, you can't do partial name searches...
+  #
   # Returns a hash with the following info:
   #  {
   #    :handle  => handle number used with other read/write commands,
   #    :name    => name of the file found,
   #    :size    => size of the file in bytes
   #  }
+  #
+  # This command creates a file handle within the nxt, so remember to use 
+  # close_command to release it.  Handle will automatically be released
+  # if it encounters an error.
   def find_first(name="*.*")
     raise "name too large" if name.size > 19
     cmd = []
@@ -737,4 +742,33 @@ class NXTComm
       false
     end
   end
+  
+  # Find the next file from a previously found file handle like from the
+  # find_first command.
+  #
+  # Returns a hash with the following info:
+  #  {
+  #    :handle  => handle number used with other read/write commands,
+  #    :name    => name of the file found,
+  #    :size    => size of the file in bytes
+  #  }
+  #
+  # The handle passed will change to the next file found, don't forget to
+  # release the handle with close_command.  When it runs out of files, it 
+  # will return false and handle will be released.
+  def find_next(handle)
+    cmd = [handle]
+    result = send_and_receive @@op_codes["find_next"], cmd
+    if result
+      parts = result.from_hex_str.unpack("CZ19V")
+      {
+        :handle => parts[0],
+        :name   => parts[1],
+        :size   => parts[2]
+      }
+    else
+      false
+    end
+  end
+  
 end
