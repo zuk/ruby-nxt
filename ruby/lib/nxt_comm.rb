@@ -695,4 +695,16 @@ class NXTComm
     end
   end
   
+  # Set the name of the nxt.  Max length 15 characters.
+  def set_brick_name(name)
+    raise "name too large" if name.size > 15
+    cmd = []
+    name.each_byte do |b|
+      cmd << b
+    end
+    result = send_and_receive @@op_codes["set_brick_name"], cmd
+    result = true if result == ""
+    result
+  end
+  
 end

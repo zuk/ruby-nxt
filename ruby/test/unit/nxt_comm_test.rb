@@ -167,4 +167,16 @@ class NXTCommTest < Test::Unit::TestCase
 	  assert info[:signal].size > 0
 	  assert info[:free].size > 0
 	end
+	
+	def test_set_brick_name
+	  old_name = @@nxt.get_device_info[:name]
+	  assert @@nxt.set_brick_name("Foo")
+    sleep 1 # brick tends to lock up for a bit after setting the brick name
+    new_name = @@nxt.get_device_info[:name]
+    assert_equal "Foo", new_name
+    assert @@nxt.set_brick_name(old_name)
+    sleep 1
+    new_name = @@nxt.get_device_info[:name]
+    assert_equal old_name, new_name
+	end
 end
