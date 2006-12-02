@@ -179,7 +179,7 @@ class NXTComm
     'open_read'                 => ["system",0x80],
     'open_write'                => ["system",0x81],
     'read_file'                 => ["system",0x82],
-    'write'                     => ["system",0x83],
+    'write_file'                => ["system",0x83],
     'close_handle'              => ["system",0x84],
     'delete_file'               => ["system",0x85],
     'find_first'                => ["system",0x86],
@@ -709,10 +709,9 @@ class NXTComm
   
   # Closes an open file handle.  Returns the handle number on success.
   def close_handle(handle)
-    cmd = []
-    cmd << handle
+    cmd = [handle]
     result = send_and_receive @@op_codes["close_handle"], cmd
-    result
+    result ? result.from_hex_str.unpack("C")[0] : false
   end
   
   # Find a file in flash memory.  The following wildcards are allowed:
@@ -815,17 +814,28 @@ class NXTComm
   # This command creates a file handle within the nxt, so remember to use 
   # close_handle command to release it.  Handle will automatically be released
   # if it encounters an error.
-  def open_write(name,size)
+  #
+  # Note: Mindstorms docs say you need to pass the size of file, but it doesn't
+  # seem to work.  Might be a typo in the docs, so I have commented it out.
+  def open_write(name,size=nil)
     raise "name too large" if name.size > 18
     cmd = []
-    name.ljust(19).each_byte do |b|
+    #name.ljust(19).each_byte do |b|
+    name.each_byte do |b|
       cmd << b
     end
-    #cmd << 32
-    [size].pack("v").each_byte do |b|
-      cmd << b
-    end
+    #[size].pack("v").each_byte do |b|
+    #  cmd << b
+    #end
     result = send_and_receive @@op_codes["open_write"], cmd
-    result ? result : false
+    result ? result.from_hex_str.unpack("C")[0] : false
+  end
+
+  # Deletes a file.  Returns the name of the file deleted.
+  def delete_file(name)
+    cmd = []
+    name.each_byte { |b| cmd << b }
+    result = send_and_receive @@op_codes["delete_file"], cmd
+    result ? result.from_hex_str.unpack("Z19")[0] : false
   end
 end

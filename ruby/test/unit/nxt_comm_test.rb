@@ -187,15 +187,25 @@ class NXTCommTest < Test::Unit::TestCase
 	  assert first_file[:handle].size > 0
 	  assert first_file[:name].size > 0
 	  assert first_file[:size].size > 0
+	  assert @@nxt.close_handle(first_file[:handle])
 
 	  assert first_file = @@nxt.find_first("*.rso")
 	  assert_kind_of Hash, first_file
 	  assert first_file[:handle].size > 0
 	  assert first_file[:name].size > 0
 	  assert first_file[:size].size > 0
+	  assert @@nxt.close_handle(first_file[:handle])
 	  
     err = capture_stderr { assert !@@nxt.find_first("*.foo") }
     assert_equal "ERROR: File not found\n", err
+	end
+	
+	def test_close_handle
+	  assert file = @@nxt.find_first
+	  assert closed = @@nxt.close_handle(file[:handle])
+	  assert_equal file[:handle], closed
+	  # since we closed the last call, another find_first should use the same handle
+	  assert_equal file[:handle], @@nxt.find_first[:handle]
 	end
 	
 	def test_find_next
@@ -204,12 +214,14 @@ class NXTCommTest < Test::Unit::TestCase
 	  assert file[:handle].size > 0
 	  assert file[:name].size > 0
 	  assert file[:size].size > 0
+	  assert @@nxt.close_handle(file[:handle])
 
 	  assert next_file = @@nxt.find_next(file[:handle])
 	  assert_kind_of Hash, next_file
 	  assert next_file[:handle].size > 0
 	  assert next_file[:name].size > 0
 	  assert next_file[:size].size > 0
+	  assert @@nxt.close_handle(next_file[:handle])
 	end
 	
 	def test_open_read
@@ -218,5 +230,13 @@ class NXTCommTest < Test::Unit::TestCase
 	  assert_kind_of Hash, file
 	  assert file[:handle].size > 0
 	  assert file[:size].size > 0
+	  assert @@nxt.close_handle(file[:handle])
+	end
+	
+	def test_open_write
+	  assert write = @@nxt.open_write("test.txt")
+	  assert_equal 0, write
+	  assert @@nxt.close_handle(write)
+	  assert @@nxt.delete_file("test.txt")
 	end
 end
