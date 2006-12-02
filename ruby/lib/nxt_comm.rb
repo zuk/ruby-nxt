@@ -176,12 +176,12 @@ class NXTComm
     'get_current_program_name'  => ["direct",0x11],
     'message_read'              => ["direct",0x13],
     # System Commands
-    'open_read_command'         => ["system",0x80],
-    'open_write_command'        => ["system",0x81],
-    'read_command'              => ["system",0x82],
-    'write_command'             => ["system",0x83],
-    'close_command'             => ["system",0x84],
-    'delete_command'            => ["system",0x85],
+    'open_read'                 => ["system",0x80],
+    'open_write'                => ["system",0x81],
+    'read_file'                 => ["system",0x82],
+    'write'                     => ["system",0x83],
+    'close_handle'              => ["system",0x84],
+    'delete_file'               => ["system",0x85],
     'find_first'                => ["system",0x86],
     'find_next'                 => ["system",0x87],
     'get_firmware_version'      => ["system",0x88],
@@ -189,7 +189,7 @@ class NXTComm
     'open_read_linear'          => ["system",0x8A], # internal command?
     'open_write_data'           => ["system",0x8B],
     'open_append_data'          => ["system",0x8C],
-    'boot_command'              => ["system",0x97], # USB only...
+    'boot'                      => ["system",0x97], # USB only...
     'set_brick_name'            => ["system",0x98],
     'get_device_info'           => ["system",0x9B],
     'delete_user_flash'         => ["system",0xA0],
@@ -707,6 +707,14 @@ class NXTComm
     result
   end
   
+  # Closes an open file handle.  Returns the handle number on success.
+  def close_handle(handle)
+    cmd = []
+    cmd << handle
+    result = send_and_receive @@op_codes["close_handle"], cmd
+    result
+  end
+  
   # Find a file in flash memory.  The following wildcards are allowed:
   # * [filename].[extension]
   # * *.[file type name]
@@ -722,7 +730,7 @@ class NXTComm
   #  }
   #
   # This command creates a file handle within the nxt, so remember to use 
-  # close_command to release it.  Handle will automatically be released
+  # close_handle command to release it.  Handle will automatically be released
   # if it encounters an error.
   def find_first(name="*.*")
     raise "name too large" if name.size > 19
@@ -754,7 +762,7 @@ class NXTComm
   #  }
   #
   # The handle passed will change to the next file found, don't forget to
-  # release the handle with close_command.  When it runs out of files, it 
+  # release the handle with close_handle command.  When it runs out of files, it 
   # will return false and handle will be released.
   def find_next(handle)
     cmd = [handle]
@@ -771,4 +779,53 @@ class NXTComm
     end
   end
   
+  # Open a file to read from.
+  #
+  # Returns a has with the following info:
+  #  {
+  #    :handle => handle number used with read command,
+  #    :size   => size of the file in bytes (FIXME: size returned doesn't appear to be correct?)
+  #  }
+  #
+  # This command creates a file handle within the nxt, so remember to use 
+  # close_handle command to release it.  Handle will automatically be released
+  # if it encounters an error.
+  def open_read(name)
+    raise "name too large" if name.size > 18
+    cmd = []
+    name.each_byte do |b|
+      cmd << b
+    end
+    result = send_and_receive @@op_codes["open_read"], cmd
+    if result
+      parts = result.from_hex_str.unpack("CV")
+      {
+        :handle => parts[0],
+        :size   => parts[1]
+      }
+    else
+      false
+    end
+  end
+
+  # Open and return a write handle number for creating a new file with 
+  # the write command.  You must specify the filename and the desired 
+  # size of the file in bytes.
+  #
+  # This command creates a file handle within the nxt, so remember to use 
+  # close_handle command to release it.  Handle will automatically be released
+  # if it encounters an error.
+  def open_write(name,size)
+    raise "name too large" if name.size > 18
+    cmd = []
+    name.ljust(19).each_byte do |b|
+      cmd << b
+    end
+    #cmd << 32
+    [size].pack("v").each_byte do |b|
+      cmd << b
+    end
+    result = send_and_receive @@op_codes["open_write"], cmd
+    result ? result : false
+  end
 end

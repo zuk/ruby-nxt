@@ -211,4 +211,12 @@ class NXTCommTest < Test::Unit::TestCase
 	  assert next_file[:name].size > 0
 	  assert next_file[:size].size > 0
 	end
+	
+	def test_open_read
+	  assert file = @@nxt.find_first
+	  assert read = @@nxt.open_read(file[:name])
+	  assert_kind_of Hash, file
+	  assert file[:handle].size > 0
+	  assert file[:size].size > 0
+	end
 end
