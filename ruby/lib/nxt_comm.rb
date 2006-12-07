@@ -334,7 +334,9 @@ class NXTComm
     @@mutex.synchronize do
       begin
         while (len_header = @sp.sysread(2))
+          #puts "Receiving #{len_header.unpack("v")[0]} bytes..."
           msg = @sp.sysread(len_header.unpack("v")[0])
+          #msg = @sp.read
           puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
         
           if msg[0] != 0x02
@@ -790,7 +792,7 @@ class NXTComm
   # close_handle command to release it.  Handle will automatically be released
   # if it encounters an error.
   def open_read(name)
-    raise "name too large" if name.size > 18
+    raise "name too large" if name.size > 19
     cmd = []
     name.each_byte do |b|
       cmd << b
@@ -814,21 +816,69 @@ class NXTComm
   # This command creates a file handle within the nxt, so remember to use 
   # close_handle command to release it.  Handle will automatically be released
   # if it encounters an error.
-  #
-  # Note: Mindstorms docs say you need to pass the size of file, but it doesn't
-  # seem to work.  Might be a typo in the docs, so I have commented it out.
-  def open_write(name,size=nil)
-    raise "name too large" if name.size > 18
+  def open_write(name,size=100)
+    raise "name too large" if name.size > 19
     cmd = []
-    #name.ljust(19).each_byte do |b|
-    name.each_byte do |b|
+    name.ljust(19).each_byte do |b|
+      b == 0x20 ? cmd << 0x00 : cmd << b
+    end
+    [size].pack("V").each_byte do |b|
       cmd << b
     end
-    #[size].pack("v").each_byte do |b|
-    #  cmd << b
-    #end
     result = send_and_receive @@op_codes["open_write"], cmd
     result ? result.from_hex_str.unpack("C")[0] : false
+  end
+
+  # Write data to a handle created with the open_write command.
+  # 
+  # Returns a hash containing:
+  #  {
+  #    :handle => the handle you're working with,
+  #    :size   => the size in bytes of the data that has been written to flash
+  #  }
+  #
+  # FIXME: I can't seem to get this to work, it always gives an error saying 
+  # "End of file expected"
+  def write_file(handle,data="")
+    cmd = [handle]
+    data.to_s.each_byte { |b| cmd << b }
+    result = send_and_receive @@op_codes["write_file"], cmd
+    if result
+      parts = result.from_hex_str.unpack("Cv")
+      {
+        :handle => parts[0],
+        :size   => parts[1]
+      }
+    else
+      false
+    end
+  end
+
+  # Reads a file from an open read handle from the open_read command.
+  #
+  # Returns a hash containing:
+  #  {
+  #    :handle => the handle that you're working with,
+  #    :size   => number of bytes that have been read,
+  #    :data   => the data that was read
+  #  }
+  #
+  # FIXME: only works with small sizes, there seems to be a bug in the way
+  # sysread is working with ruby serialport...
+  def read_file(handle,size=100)
+    cmd = [handle]
+    [size].pack("v").each_byte { |b| cmd << b }
+    result = send_and_receive @@op_codes["read_file"], cmd
+    if result
+      data = result.from_hex_str
+      {
+        :handle => data[0],
+        :size   => data[1..2].unpack("v")[0],
+        :data   => data[3..-1]
+      }
+    else
+      false
+    end
   end
 
   # Deletes a file.  Returns the name of the file deleted.
