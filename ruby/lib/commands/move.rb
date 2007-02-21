@@ -58,7 +58,7 @@ class Commands::Move
       when :spin_left then @turn_ratio = -100
       when :spin_right then @turn_ratio = 100
       when :left then @turn_ratio = -50
-      when :right then @turn_ration = 50
+      when :right then @turn_ratio = 50
       else @turn_ratio = turn_ratio
     end
 
