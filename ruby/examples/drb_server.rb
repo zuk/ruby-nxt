@@ -3,6 +3,7 @@
 # it also spawns a thread that periodically calls keep_alive to prevent
 # the nxt from going to sleep
 
+require "rubygems"
 require "drb"
 require "thread"
 require "nxt_comm"

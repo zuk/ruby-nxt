@@ -17,10 +17,14 @@
 begin
   # Need to do a Kernel::require otherwise when included with rubygems, it fails
   Kernel::require "serialport"
+  require "usb"
+  #require "serialport"
 rescue LoadError
   puts
-  puts "You must have the ruby-serialport library installed!"
+  puts "You must have the ruby-serialport and ruby-usb installed!"
   puts "You can download ruby-serialport from http://rubyforge.org/projects/ruby-serialport/"
+  puts "You can download ruby-usb from http://www.a-k-r.org/ruby-usb/"
+  puts "note: OSX currently requires latest ruby-usb development version from subversion"
   puts
   exit 1
 end
@@ -56,6 +60,9 @@ class Bignum
     -1*(self^0xffffffff) if self > 0xfffffff
   end
 end
+
+$DEV ||= nil
+$INTERFACE ||= nil
 
 # = Description
 #
@@ -97,6 +104,14 @@ end
 #   puts "Battery Level: #{@nxt.get_battery_level/1000.0} V"
 #
 class NXTComm
+
+  USB_ID_VENDOR_LEGO = 0x0694
+  USB_ID_PRODUCT_NXT = 0x0002
+  USB_OUT_ENDPOINT   = 0x01
+  USB_IN_ENDPOINT    = 0x82
+  USB_TIMEOUT        = 1000
+  USB_READSIZE       = 64
+  USB_INTERFACE      = 0
   
   # sensors
   SENSOR_1  = 0x00
@@ -250,36 +265,65 @@ class NXTComm
   # Create a new instance of NXTComm.
   # Be careful not to create more than one NXTComm object per serial port dev.
   # If two NXTComms try to talk to the same dev, there will be trouble. 
-  def initialize(dev = $DEV)
+  def initialize(dev = nil)
+  
+    dev ||= $DEV
   
     @@mutex.synchronize do
       begin
-        @sp = SerialPort.new(dev, 57600, 8, 1, SerialPort::NONE)
+        if dev
+          @connection_type = "serialport"
+          @sp = SerialPort.new(dev, 57600, 8, 1, SerialPort::NONE)
       
-        @sp.flow_control = SerialPort::HARD
-        @sp.read_timeout = 5000
-      rescue Errno::EBUSY
-        raise "Cannot connect to #{dev}. The serial port is busy or unavailable."
+          @sp.flow_control = SerialPort::HARD
+          @sp.read_timeout = 5000
+          $stderr.puts "Cannot connect to #{dev}" if @sp.nil?
+        else
+          @connection_type = "usb"
+          @interface = $INTERFACE || USB_INTERFACE
+          # TODO: probably a better way to find the device
+          @usb = nil
+          @usbdev = nil
+          USB.devices.find_all do |d|
+            @usb_dev = d if d.idVendor == USB_ID_VENDOR_LEGO and d.idProduct == USB_ID_PRODUCT_NXT
+          end
+          $stderr.puts "Cannot find usb device" if @usb_dev.nil?
+          @usb = @usb_dev.open
+          @usb.usb_reset
+          @usb.claim_interface(@interface)
+        end
+      # rescue Errno::EBUSY
+      rescue
+        raise "Cannot connect. The #{@connection_type} device is busy or unavailable."
       end
     end
     
-    if @sp.nil?
-      $stderr.puts "Cannot connect to #{dev}"
-    else
-      puts "Connected to: #{dev}" if $DEBUG
-    end
+    puts "Connected to: #{@connection_type} #{dev || @interface}" if $DEBUG
   end
 
   # Close the connection
   def close
     @@mutex.synchronize do
-      @sp.close if @sp and not @sp.closed?
+      case @connection_type
+      when "serialport"
+        @sp.close if @sp and not @sp.closed?
+      when "usb"
+        if @usb
+          @usb.release_interface(@interface)
+          @usb.usb_close
+        end
+      end
     end
   end
   
   # Returns true if the connection to the NXT is open; false otherwise
   def connected?
-    not @sp.closed?
+    case @connection_type
+    when "serialport"
+      not @sp.closed?
+    when "usb"
+      not @usb.revoked?
+    end
   end
 
   # Send message and return response
@@ -321,10 +365,18 @@ class NXTComm
     @@mutex.synchronize do
       #msg = [0x00] + msg # direct command, reply required (now set in send_and_receive)
       #puts "Message Size: #{msg.size}" if $DEBUG
-      msg = [(msg.size & 255),(msg.size >> 8)] + msg
-      puts "Sending Message: #{msg.to_hex_str}" if $DEBUG
-      msg.each do |b|
-        @sp.putc b
+      case @connection_type
+      when "serialport"
+        msg = [(msg.size & 255),(msg.size >> 8)] + msg
+        puts "Sending Message (size: #{msg.size}): #{msg.to_hex_str}" if $DEBUG
+        msg.each do |b|
+          @sp.putc b
+        end
+      when "usb"
+        puts "Sending Message (size: #{msg.size}): #{msg.to_hex_str}" if $DEBUG
+        # ret = @usb.usb_bulk_write(@usb_dev.endpoints[0].bEndpointAddress, msg[1..-1].pack("C*"), USB_TIMEOUT)
+        ret = @usb.usb_bulk_write(USB_OUT_ENDPOINT, msg.pack("C*"), USB_TIMEOUT)
+        puts "ret = #{ret}"
       end
     end
   end
@@ -333,27 +385,44 @@ class NXTComm
   def recv_reply
     @@mutex.synchronize do
       begin
-        while (len_header = @sp.sysread(2))
-          #puts "Receiving #{len_header.unpack("v")[0]} bytes..."
+        msg = ""
+        
+        case @connection_type
+        when "serialport"
+          # while (len_header = @sp.sysread(2))
+          #   msg = @sp.sysread(len_header.unpack("v")[0])
+          # end
+          len_header = @sp.sysread(2)
           msg = @sp.sysread(len_header.unpack("v")[0])
-          #msg = @sp.read
-          puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
-        
-          if msg[0] != 0x02
-            error = "ERROR: Returned something other then a reply telegram"
-            return [false,error]
-          end
-        
-          if msg[2] != 0x00
-            error = "ERROR: #{@@error_codes[msg[2]]}"
-            return [false,error]
-          end
-        
-          return [true,msg]
+        when "usb"
+          # ret = @usb.usb_bulk_read(@usb_dev.endpoints[1].bEndpointAddress, msg, USB_TIMEOUT)
+          ret = @usb.usb_bulk_read(USB_IN_ENDPOINT, msg, USB_TIMEOUT)
+          puts "endpoint = #{USB_IN_ENDPOINT}"
+          puts "ret = #{ret}"
+          puts "msg = #{msg}"
+          raise "Received Nothing" if msg.to_s == ""
+          len_header = msg.size
         end
-      rescue EOFError
+
+      # rescue EOFError
+      rescue
       	raise "Cannot read from the NXT. Make sure the device is on and connected."
       end
+      
+      puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
+  
+      if msg[0] != 0x02
+        error = "ERROR: Returned something other then a reply telegram"
+        return [false,error]
+      end
+  
+      if msg[2] != 0x00
+        error = "ERROR: #{@@error_codes[msg[2]]}"
+        return [false,error]
+      end
+  
+      return [true,msg]
+      
     end
   end
 
