@@ -328,6 +328,12 @@ class NXTComm
 
   # Send message and return response
   def send_and_receive(op,cmd,request_reply=true)
+    # if @connection_type == "serialport"
+    #   request_reply = true
+    # else
+    #   request_reply = false
+    # end
+    
     case op[0]
     when "direct"
       request_reply ? command_byte = [0x00] : command_byte = [0x80]
@@ -376,7 +382,6 @@ class NXTComm
         puts "Sending Message (size: #{msg.size}): #{msg.to_hex_str}" if $DEBUG
         # ret = @usb.usb_bulk_write(@usb_dev.endpoints[0].bEndpointAddress, msg[1..-1].pack("C*"), USB_TIMEOUT)
         ret = @usb.usb_bulk_write(USB_OUT_ENDPOINT, msg.pack("C*"), USB_TIMEOUT)
-        puts "ret = #{ret}"
       end
     end
   end
@@ -394,14 +399,15 @@ class NXTComm
           # end
           len_header = @sp.sysread(2)
           msg = @sp.sysread(len_header.unpack("v")[0])
-        when "usb"
-          # ret = @usb.usb_bulk_read(@usb_dev.endpoints[1].bEndpointAddress, msg, USB_TIMEOUT)
-          ret = @usb.usb_bulk_read(USB_IN_ENDPOINT, msg, USB_TIMEOUT)
-          puts "endpoint = #{USB_IN_ENDPOINT}"
-          puts "ret = #{ret}"
-          puts "msg = #{msg}"
-          raise "Received Nothing" if msg.to_s == ""
-          len_header = msg.size
+        when "usb"        
+          # ruby-usb is a little odd with usb_bulk_read, instead of passing a read size, you pass a string
+          # that is of the size you want to read...
+          USB_READSIZE.times do
+            msg << " " 
+          end
+          len_header = @usb.usb_bulk_read(USB_IN_ENDPOINT, msg, USB_TIMEOUT)
+          msg = msg[0..(len_header - 1)].to_s
+          len_header = len_header.to_s
         end
 
       # rescue EOFError
