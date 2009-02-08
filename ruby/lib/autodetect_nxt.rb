@@ -29,8 +29,11 @@ unless $DEV or ENV['NXT'] or ENV['DEV']
 	begin
 		devices = Dir["/dev/*NXT*"]
 		$DEV = devices[0] if devices.size > 0
+		devices = Dir["/dev/rfcomm*"]
+		$DEV = devices[0] if devices.size > 0
 		puts "Auto-detected NXT at #{$DEV}"
 	rescue
+		$stderr.puts "WARNING: NXT could not be automatically detected!"
 		# the /dev directory probably doesn't exist... maybe we're on Win32?
 	end
 end
