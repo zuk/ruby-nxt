@@ -16,7 +16,7 @@
 
 begin
 	require 'rubygems'
-	require_gem "term-ansicolor"
+	require "term-ansicolor"
 	$COLOUR = true
 rescue LoadError
 	$COLOUR = false
