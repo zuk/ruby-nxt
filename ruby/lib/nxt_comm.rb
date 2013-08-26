@@ -352,7 +352,7 @@ class NXTComm
     if request_reply
       ok,response = recv_reply
     
-      if ok and response[1] == op[1]
+      if ok and response.bytes[1] == op[1]
         data = response[3..response.size]
         # TODO ? if data contains a \n character, ruby seems to pass the parts before and after the \n
         # as two different parameters... we need to encode the data into a format that doesn't
@@ -422,13 +422,13 @@ class NXTComm
       
       puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
   
-      if msg[0] != 0x02
+      if msg.bytes[0] != 0x02
         error = "ERROR: Returned something other then a reply telegram"
         return [false,error]
       end
   
-      if msg[2] != 0x00
-        error = "ERROR: #{@@error_codes[msg[2]]}"
+      if msg.bytes[2] != 0x00
+        error = "ERROR: #{@@error_codes[msg.bytes[2]]}"
         return [false,error]
       end
   
