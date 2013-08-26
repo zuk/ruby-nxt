@@ -17,18 +17,15 @@
 begin
   begin
     require "serialport"
-    require "usb"
+    require "libusb"
   rescue LoadError
     require "rubygems"
     require "serialport"
-    require "usb"
+    require "libusb"
   end
 rescue LoadError => e
   puts
-  puts "You must have the ruby-serialport and ruby-usb installed!"
-  puts "You can download ruby-serialport from http://rubyforge.org/projects/ruby-serialport/"
-  puts "You can download ruby-usb from http://www.a-k-r.org/ruby-usb/"
-  puts "note: OSX currently requires latest ruby-usb development version from subversion"
+  puts "You must have serialport and libusb installed!"
   puts
   raise e
   #exit 1
@@ -286,15 +283,11 @@ class NXTComm
         else
           @connection_type = "usb"
           @interface = $INTERFACE || USB_INTERFACE
-          # TODO: probably a better way to find the device
-          @usb = nil
-          @usbdev = nil
-          USB.devices.find_all do |d|
-            @usb_dev = d if d.idVendor == USB_ID_VENDOR_LEGO and d.idProduct == USB_ID_PRODUCT_NXT
-          end
+          usb = LIBUSB::Context.new
+          @usb_dev = usb.devices(idVendor: USB_ID_VENDOR_LEGO, idProduct: USB_ID_PRODUCT_NXT).first
           $stderr.puts "Cannot find usb device" if @usb_dev.nil?
           @usb = @usb_dev.open
-          @usb.usb_reset
+          @usb.reset_device
           @usb.claim_interface(@interface)
         end
       # rescue Errno::EBUSY
@@ -315,7 +308,8 @@ class NXTComm
       when "usb"
         if @usb
           @usb.release_interface(@interface)
-          @usb.usb_close
+          @usb.close
+          @usb_dev = @usb = nil
         end
       end
     end
@@ -327,7 +321,7 @@ class NXTComm
     when "serialport"
       not @sp.closed?
     when "usb"
-      not @usb.revoked?
+      not not @usb
     end
   end
 
@@ -386,7 +380,7 @@ class NXTComm
       when "usb"
         puts "Sending Message (size: #{msg.size}): #{msg.to_hex_str}" if $DEBUG
         # ret = @usb.usb_bulk_write(@usb_dev.endpoints[0].bEndpointAddress, msg[1..-1].pack("C*"), USB_TIMEOUT)
-        ret = @usb.usb_bulk_write(USB_OUT_ENDPOINT, msg.pack("C*"), USB_TIMEOUT)
+        ret = @usb.bulk_transfer(endpoint: USB_OUT_ENDPOINT, dataOut: msg.pack("C*"), timeout: USB_TIMEOUT)
       end
     end
   end
@@ -395,6 +389,7 @@ class NXTComm
   def recv_reply
     @@mutex.synchronize do
       begin
+        len_header = ""
         msg = ""
         
         case @connection_type
@@ -405,14 +400,7 @@ class NXTComm
           len_header = @sp.sysread(2)
           msg = @sp.sysread(len_header.unpack("v")[0])
         when "usb"        
-          # ruby-usb is a little odd with usb_bulk_read, instead of passing a read size, you pass a string
-          # that is of the size you want to read...
-          USB_READSIZE.times do
-            msg << " " 
-          end
-          len_header = @usb.usb_bulk_read(USB_IN_ENDPOINT, msg, USB_TIMEOUT)
-          msg = msg[0..(len_header - 1)].to_s
-          len_header = len_header.to_s
+          msg = @usb.bulk_transfer(endpoint: USB_IN_ENDPOINT, dataIn: USB_READSIZE, timeout: USB_TIMEOUT)
         end
 
       # rescue EOFError
