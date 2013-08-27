@@ -32,6 +32,7 @@ rescue LoadError => e
 end
 require "thread"
 require "commands"
+require "connections"
 
 class Array
   def to_hex_str
@@ -107,14 +108,6 @@ $INTERFACE ||= nil
 #
 class NXTComm
 
-  USB_ID_VENDOR_LEGO = 0x0694
-  USB_ID_PRODUCT_NXT = 0x0002
-  USB_OUT_ENDPOINT   = 0x01
-  USB_IN_ENDPOINT    = 0x82
-  USB_TIMEOUT        = 1000
-  USB_READSIZE       = 64
-  USB_INTERFACE      = 0
-  
   # sensors
   SENSOR_1  = 0x00
   SENSOR_2  = 0x01
@@ -274,65 +267,33 @@ class NXTComm
     @@mutex.synchronize do
       begin
         if dev
-          @connection_type = "serialport"
-          @sp = SerialPort.new(dev, 57600, 8, 1, SerialPort::NONE)
-      
-          @sp.flow_control = SerialPort::HARD
-          @sp.read_timeout = 5000
-          $stderr.puts "Cannot connect to #{dev}" if @sp.nil?
+          @connection = Connections::Bluetooth.new(dev)
         else
-          @connection_type = "usb"
-          @interface = $INTERFACE || USB_INTERFACE
-          usb = LIBUSB::Context.new
-          @usb_dev = usb.devices(idVendor: USB_ID_VENDOR_LEGO, idProduct: USB_ID_PRODUCT_NXT).first
-          $stderr.puts "Cannot find usb device" if @usb_dev.nil?
-          @usb = @usb_dev.open
-          @usb.reset_device
-          @usb.claim_interface(@interface)
+          @connection = Connections::Usb.new($INTERFACE)
         end
       # rescue Errno::EBUSY
       rescue
-        raise "Cannot connect. The #{@connection_type} device is busy or unavailable."
+        raise "Cannot connect. The device is busy or unavailable."
       end
     end
     
-    puts "Connected to: #{@connection_type} #{dev || @interface}" if $DEBUG
+    puts "Connected to: #{@connection.type} #{@connection.info}" if $DEBUG
   end
 
   # Close the connection
   def close
     @@mutex.synchronize do
-      case @connection_type
-      when "serialport"
-        @sp.close if @sp and not @sp.closed?
-      when "usb"
-        if @usb
-          @usb.release_interface(@interface)
-          @usb.close
-          @usb_dev = @usb = nil
-        end
-      end
+      @connection.close
     end
   end
   
   # Returns true if the connection to the NXT is open; false otherwise
   def connected?
-    case @connection_type
-    when "serialport"
-      not @sp.closed?
-    when "usb"
-      not not @usb
-    end
+    @connection.connected?
   end
 
   # Send message and return response
   def send_and_receive(op,cmd,request_reply=true)
-    # if @connection_type == "serialport"
-    #   request_reply = true
-    # else
-    #   request_reply = false
-    # end
-    
     case op[0]
     when "direct"
       request_reply ? command_byte = [0x00] : command_byte = [0x80]
@@ -356,7 +317,7 @@ class NXTComm
         $stderr.puts response
         data = false
       else
-        $stderr.puts "ERROR: Unexpected response #{response}"
+        $stderr.puts "ERROR: Unexpected response #{response.inspect}"
         data = false
       end
     else
@@ -368,20 +329,8 @@ class NXTComm
   # Send direct command bytes
   def send_cmd(msg)
     @@mutex.synchronize do
-      #msg = [0x00] + msg # direct command, reply required (now set in send_and_receive)
-      #puts "Message Size: #{msg.size}" if $DEBUG
-      case @connection_type
-      when "serialport"
-        msg = [(msg.size & 255),(msg.size >> 8)] + msg
-        puts "Sending Message (size: #{msg.size}): #{msg.to_hex_str}" if $DEBUG
-        msg.each do |b|
-          @sp.putc b
-        end
-      when "usb"
-        puts "Sending Message (size: #{msg.size}): #{msg.to_hex_str}" if $DEBUG
-        # ret = @usb.usb_bulk_write(@usb_dev.endpoints[0].bEndpointAddress, msg[1..-1].pack("C*"), USB_TIMEOUT)
-        ret = @usb.bulk_transfer(endpoint: USB_OUT_ENDPOINT, dataOut: msg.pack("C*"), timeout: USB_TIMEOUT)
-      end
+      puts "Sending Message (size: #{msg.size}): #{msg.to_hex_str}" if $DEBUG
+      @connection.write(msg)
     end
   end
   
@@ -389,26 +338,14 @@ class NXTComm
   def recv_reply
     @@mutex.synchronize do
       begin
-        len_header = ""
-        msg = ""
-        
-        case @connection_type
-        when "serialport"
-          # while (len_header = @sp.sysread(2))
-          #   msg = @sp.sysread(len_header.unpack("v")[0])
-          # end
-          len_header = @sp.sysread(2)
-          msg = @sp.sysread(len_header.unpack("v")[0])
-        when "usb"        
-          msg = @usb.bulk_transfer(endpoint: USB_IN_ENDPOINT, dataIn: USB_READSIZE, timeout: USB_TIMEOUT)
-        end
+        msg = @connection.read
 
       # rescue EOFError
       rescue
       	raise "Cannot read from the NXT. Make sure the device is on and connected."
       end
       
-      puts "Received Message: #{len_header.to_hex_str}#{msg.to_hex_str}" if $DEBUG
+      puts "Received Message: #{msg.to_hex_str}" if $DEBUG
   
       if msg.bytes[0] != 0x02
         error = "ERROR: Returned something other then a reply telegram"
